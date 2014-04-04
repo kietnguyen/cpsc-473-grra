@@ -1,0 +1,23 @@
+extends ../layout
+
+block content
+  - if (feeds.length)
+    - each feed in feeds
+      .feed
+        h3
+          a(href='#{feed.url}') #{feed.title}
+        p !{feed.description}
+        
+        .meta
+          span #{moment(feed.pubDate).format('MMMM Do YYYY, h:mm:ss a')} 
+          - if (feed.author)
+            | &nbsp; | &nbsp;
+            span Author: #{feed.author}
+            
+        
+    - if (pages > 1)
+      ul.pagination
+        != createPagination(pages, page)
+  - else
+    h4 No feed.&nbsp;
+      a(href='/feed/new') Create one.

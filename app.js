@@ -1,15 +1,38 @@
 #!/usr/bin/env node
 "use strict";
 
-var express = require('express');
-var http = require('http');
-var path = require('path');
+var express = require('express'),
+    http = require('http'),
+    path = require('path'),
+    helpers = require('view-helpers');
 
 var routes = require('./routes');
 var user = require('./routes/user');
 var feed = require('./routes/feed');
 
+var env = process.env.NODE_ENV || 'development',
+    config = require('./config/config')[env],
+    mongoose = require('mongoose');
+
+// Connect to db
+var connect = function () {
+  var options = { server: { socketOptions: { keepAlive: 1 } } };
+  mongoose.connect(config.db, options);
+};
+connect();
+
+// Error handler
+mongoose.connection.on('error', function (err) {
+  console.error(err);
+});
+
+// Reconnect when closed
+mongoose.connection.on('disconnected', function () {
+  connect();
+});
+
 var app = express();
+app.locals.moment = require('moment');
 
 // all environments
 app.set('port', process.env.PORT || 8080);

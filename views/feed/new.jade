@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+  form(method='post', action='/feeds')
+    fieldset
+      legend CREATE A NEW FEED
+      p
+        label(for='feedUrl') Url
+          input(type='url', name='feedUrl', required)
+    input(type='submit', value='Add')
+    input.back(type='button', value='Cancel')
+    
+  script(type='text/javascript').
+    $('input.back').click(function() {
+      location.href = '/user';
+    });
