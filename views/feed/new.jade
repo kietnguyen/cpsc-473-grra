@@ -1,16 +1,12 @@
 extends ../layout
 
 block content
-  form(method='post', action='/feeds')
-    fieldset
-      legend CREATE A NEW FEED
-      p
-        label(for='feedUrl') Url
-          input(type='url', name='feedUrl', required)
-    input(type='submit', value='Add')
-    input.back(type='button', value='Cancel')
-    
-  script(type='text/javascript').
-    $('input.back').click(function() {
-      location.href = '/user';
-    });
+  p.col-sm-12
+    a(href='/user/#{uid}/feeds')
+      span.glyphicon.glyphicon-home &nbsp;
+      | Back to all feeds
+  form.col-sm-12(role='form', method='post', action='/user/#{uid}/feeds')
+    .input-group
+      input.form-control(type='url', id='url', required, placeholder='New Feed URL')
+      spand.input-group-btn
+        button.btn.btn-primary(type='submit') Add

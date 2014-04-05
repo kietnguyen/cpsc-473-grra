@@ -17,6 +17,8 @@
     "passport-facebook": "*",
     "view-helpers": "^0.1.4",
     "mongoose-auto-increment": "^3.0.1",
-    "moment": "^2.5.1"
+    "moment": "^2.5.1",
+    "async": "^0.6.2",
+    "node-schedule": "^0.1.13"
   }
 }

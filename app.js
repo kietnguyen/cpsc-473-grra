@@ -4,11 +4,12 @@
 var express = require('express'),
     http = require('http'),
     path = require('path'),
-    helpers = require('view-helpers');
+    helpers = require('view-helpers'),
+    schedule = require('node-schedule');
 
-var routes = require('./routes');
-var user = require('./routes/user');
-var feed = require('./routes/feed');
+var routes = require('./routes'),
+    user = require('./routes/user'),
+    feed = require('./routes/feed');
 
 var env = process.env.NODE_ENV || 'development',
     config = require('./config/config')[env],
@@ -34,6 +35,10 @@ mongoose.connection.on('disconnected', function () {
 var app = express();
 app.locals.moment = require('moment');
 
+schedule.scheduleJob({minute:26}, function() {
+  console.log("it's 26");
+});
+
 // all environments
 app.set('port', process.env.PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
@@ -43,6 +48,7 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
+app.use(helpers());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 

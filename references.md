@@ -1,6 +1,7 @@
 ## Node modules
-* [express]
-* [mongoose]
+* [async](https://github.com/caolan/async)
+* [express](http://expressjs.com/3x/api.html)
+* [mongoose](http://mongoosejs.com/docs/api.html)
 * [mongoose-auto-increment](https://github.com/codetunnel/mongoose-auto-increment)
 * [moment](http://momentjs.com/)
 * [view-helpers](https://github.com/madhums/node-view-helpers)
@@ -15,3 +16,4 @@
 
 ## Q&A from Google
 * [Display date in nodejs jade](https://stackoverflow.com/questions/12419396/how-do-i-display-todays-date-in-nodejs-jade)
+* [MongoDB Aggregation: Counting distinct fields](https://stackoverflow.com/questions/18501064/mongodb-aggregation-counting-distinct-fields)

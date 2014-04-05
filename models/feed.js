@@ -39,14 +39,22 @@ FeedSchema.methods = {
 FeedSchema.statics = {
   // List all feeds
   list: function (options, cb) {
-    //console.dir(options);
+    console.dir(options);
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
       { $project: { _id: 0, items: 1 } }, 
       { $unwind: '$items'}, 
-      { $sort: { 'items.pubDate': -1 } } )
-    .limit(options.perPage)
-    .skip(options.perPage * options.page)
+      { $sort: { 'items.pubDate': -1 } },
+      { $limit: options.perPage },
+      { $skip: options.perPage * options.page } )
+    .exec(cb);
+  }, 
+  count: function (options, cb) {
+    this.aggregate(
+      { $match: { _id: { $in: options.feeds } } },
+      { $project: { _id: 0, items: 1 } }, 
+      { $unwind: '$items'},
+      { $group: { _id: null, total: { $sum: 1 } } } )
     .exec(cb);
   }
 };
