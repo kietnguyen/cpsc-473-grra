@@ -7,6 +7,6 @@ block content
       | Back to all feeds
   form.col-sm-12(role='form', method='post', action='/user/#{uid}/feeds')
     .input-group
-      input.form-control(type='url', id='url', required, placeholder='New Feed URL')
+      input.form-control(type='url', id='url', name='url', required, placeholder='New Feed URL')
       spand.input-group-btn
         button.btn.btn-primary(type='submit') Add
