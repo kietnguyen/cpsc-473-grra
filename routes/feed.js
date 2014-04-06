@@ -147,20 +147,19 @@ exports.create = function(req, res) {
   })*/
 };
 
-// show a feed from a user
-exports.show = function(req, res) {
+// show a feed or all feeds of a user
+exports.index = function(req, res) {
   var uid = parseInt(req.params.uid), 
       fid = parseInt(req.params.fid),
       page = (req.param('page') > 0 ? req.param('page') : 1) - 1, 
       perPage = 4;
 
-  if (isNaN(uid) || isNaN(fid)) {
+  if (isNaN(uid) || (req.params.fid !== undefined && isNaN(fid))) {
     return errorHandler.loadPage(404, new Error('uid or fid is NaN'), res);
   }
 
-  User.getFeedsByUserId(uid, function (err, user) {
+  User.getFeedsByUserId(uid, function (err, userFeeds) {
     if (err) {
-      console.error(err);
       return errorHandler.loadPage(500, err, res);
     }
 
@@ -170,10 +169,19 @@ exports.show = function(req, res) {
 
     var options = {
       uid: uid,
-      feeds: [fid],
       page: page,
       perPage: perPage
     };
+
+    if (req.params.fid === undefined) {
+      // show all feeds
+      options.feeds = userFeeds.feeds;
+    } else {
+      if (!_.contains(userFeeds.feeds, fid)) {
+        return errorHandler(404, new Error('userFeeds.feeds does not contain fid'), res);
+      }
+      options.feeds = [fid];
+    }
 
     Feed.list(options, function(err, feedItems) {
       if (err) {
@@ -210,5 +218,44 @@ exports.delete = function(req, res) {
     if (err) {
        return errorHandler(404, new Error('Invalid feed'), res);
     }
+  });
+};
+
+exports.refresh = function (req, res) {
+  var uid = parseInt(req.params.uid),
+      fid = parseInt(req.params.fid);
+
+  if (isNaN(uid) || (req.params.fid !== undefined && isNaN(fid))) {
+    return errorHandler.loadPage(404, new Error('uid or fid is NaN'), res);
+  }
+
+  User.getFeedsByUserId(uid, function(err, userFeeds) {
+    if (err) {
+      return errorHandler.loadPage(500, err, res);
+    }
+
+    var feeds;
+    if (req.params.fid === undefined) {
+      // all feeds
+      feeds = userFeeds.feeds;
+    } else {
+      // one feed
+      if (!_.contains(userFeeds.feeds, fid)) {
+        return errorHandler(404, new Error('userFeeds.feeds does not contain fid'), res);
+      }
+      feeds = [fid];
+    }
+
+    Feed.fetch(feeds);
+  });
+};
+
+exports.fetch = function (req, res) {
+  User.getAllFeeds(function(err, allFeeds) {
+    if (err) {
+      return errorHandler.loadPage(500, err, res);
+    }
+
+    Feed.fetch(allFeeds);
   });
 };
