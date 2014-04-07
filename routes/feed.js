@@ -28,12 +28,50 @@ var feedIndex = function (err, res, feedItems, options) {
     title: 'GRRA | Feeds',
     feedItems: feedItems,
     uid: options.uid,
-    fid: options.fid,
     page: options.page + 1,
     pages: Math.ceil(options.totalItems / options.perPage)
   });  
 };
 
+// show all feeds from a user
+exports.index = function(req, res) {
+  var uid = parseInt(req.params.uid), 
+      page = (req.param('page') > 0 ? req.param('page') : 1) - 1, 
+      perPage = 4;
+
+  if (isNaN(uid)) {
+    return errorHandler(404, 'uid is NaN', res);
+  }
+
+  User.getFeedsByUserId(uid, function (err, user) {
+    if (err) {
+      return errorHandler.loadPage(500, err, res);
+    }
+
+    var options = {
+      uid: uid,
+      feeds: user.feeds,
+      page: page,
+      perPage: perPage
+    };
+
+    Feed.list(options, function(err, feedItems) {
+      if (err) {
+        return errorHandler.loadPage(500, err, res);
+      }
+
+      Feed.count(options, function(err, total) {
+        if (err) {
+          console.error(err);
+          return errorHandler.loadPage(500, err, res);
+        }
+        options.totalItems = total[0].total;
+        feedIndex(err, res, feedItems, options);
+      });
+    });
+
+  });
+};
 
 exports.new = function(req, res) {
   var uid = parseInt(req.params.uid);
@@ -51,6 +89,9 @@ exports.new = function(req, res) {
 exports.create = function(req, res) {
 	//console.log(req.body.url);
 	//use example: http://leoville.tv/podcasts/sn.xml
+	console.log(req.params.uid);
+	var uid = req.params.uid;
+	var flag = true;
 	var req = request(req.body.url)
 	  , feedparser = new FeedParser();
 
@@ -77,9 +118,10 @@ exports.create = function(req, res) {
 		, item;
 	  
 	  var theArray = [];
+	  var theItem;
 	  while (item = stream.read()) {
 
-		var theItem = {
+		theItem = {
 			title: item.title,
 			url: item.link,
 			description: item.description,
@@ -90,24 +132,39 @@ exports.create = function(req, res) {
 
 	  }
 	  
+	  if(flag === true) {
+	  Feed.find({'title': meta.title}, function(err, theResult) {
+		if(theResult.length) {
+			console.log("exists");
+			Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
+		}
+		else {
 	  var newFeed = new Feed({
-		uid: 1,
+	    uid: uid,
 		title: meta.title,
 		url:  meta.link,
 		description: meta.description,
-		items: theArray
       });
 	  
-  
-  newFeed.save( function(error, data){
-    if(error){
-        return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
-    }
-    else{
-    }
-  })
+	  newFeed.save( function(error, data){
+		if(error){
+			return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
+		}
+		else{
+		}
+	  })
+	  }
+	  });
+	  
+	  
+	  flag = false;
+	  }
+	  
+	  Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) { if (err) {console.log("error");}});
   
 	});
+	
+	
 redirect("/", res);
 };
 
@@ -127,6 +184,10 @@ exports.index = function(req, res) {
       return errorHandler.loadPage(500, err, res);
     }
 
+    if (!_.contains(user.feeds, fid)) {
+      return errorHandler(404, new Error('user.feeds does not contain fid'), res);
+    }
+
     var options = {
       uid: uid,
       page: page,
@@ -141,7 +202,6 @@ exports.index = function(req, res) {
         return errorHandler(404, new Error('userFeeds.feeds does not contain fid'), res);
       }
       options.feeds = [fid];
-      options.fid = fid;
     }
 
     Feed.list(options, function(err, feedItems) {
@@ -164,28 +224,11 @@ exports.index = function(req, res) {
 };
 
 exports.edit = function(req, res) {
-  var uid = parseInt(req.params.uid),
-      fid = parseInt(req.params.fid);
-
-      
-  res.render('feed/edit',{
-      title: req.params.title,
-      url : req.params.url,
-      uid: uid,
-      fid: fid
-      });
+  res.send("feed.edit");
 };
 
 exports.update = function(req, res) {
-var uid = parseInt(req.params.uid), 
-    fid = parseInt(req.params.fid);
-  
-  var title = req.body.title;
-  Feed.update({ _id: fid }, {$set: { title: title}}, function(err){
-  if (err) console.error(err);
-    res.redirect('/user/' + uid + '/feeds/' + fid);
-  
-});
+  res.send("feed.update");
 };
 
 exports.delete = function(req, res) {
@@ -198,8 +241,6 @@ exports.delete = function(req, res) {
     }
   });
 };
-
-
 
 exports.refresh = function (req, res) {
   var uid = parseInt(req.params.uid),
