@@ -35,8 +35,9 @@ mongoose.connection.on('disconnected', function () {
 var app = express();
 app.locals.moment = require('moment');
 
-schedule.scheduleJob({minute:0}, function() {
-  feed.fetch();
+schedule.scheduleJob({minute:15}, function() {
+  console.log("Refresh all ... ");
+  feed.refreshAll();
 });
 
 // all environments

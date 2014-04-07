@@ -2,21 +2,17 @@ extends ../layout
 
 block content
   - if (feedItems.length)
-    - if (isNaN(fid))
-      a(href='/user/#{uid}/feeds/refresh') REFRESH
-    - else
-      // For single feed
-      // Feed title
-      h1 
-      // Feed controller
-      a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH
-      a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
+    // For single feed
+    // Feed title -> (?)
+
+    // Feed controller
+    a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH
+    a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
     - each item in feedItems
       .feed
         h3
           a(href='#{item.url}') #{item.title}
-        p.desciption 
-          !{item.description}
+        p !{item.description}
         
         .meta
           span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')} 
