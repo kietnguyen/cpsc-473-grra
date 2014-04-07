@@ -30,6 +30,12 @@ UserSchema.statics = {
   getFeedsByUserId: function (uid, cb) {
     this.findById(uid, 'feeds')
     .exec(cb);
+  },
+
+  // List all feeds of all users
+  getAllFeeds: function(cb) {
+    this.distinct('feeds')
+    .exec(cb);
   }
 };
 

@@ -4,10 +4,12 @@
 require('./user.js');
 
 var mongoose = require('mongoose'),
+    async = require('async'),
+    autoIncrement = require('mongoose-auto-increment'),
+    feedparser = require('feedparser'),
     env = process.env.NODE_ENV || 'development',
     config = require('../config/config')[env],
     Schema = mongoose.Schema,
-    autoIncrement = require('mongoose-auto-increment'),
     User = mongoose.model('User');
 
 var connection = mongoose.createConnection(config.db);
@@ -18,6 +20,7 @@ var FeedSchema = new Schema({
   title: { type: String, trim: true },
   url:  { type: String, trim: true },
   description: { type: String, trim: true },
+  lastUpdate: { type: Date },
   items: [{
     title: { type: String, trim: true },
     url: { type: String, trim: true },
@@ -38,24 +41,32 @@ FeedSchema.methods = {
 
 FeedSchema.statics = {
   // List all feeds
-  list: function (options, cb) {
-    console.dir(options);
+  list: function(options, cb) {
+    //console.dir(options);
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
       { $project: { _id: 0, items: 1 } }, 
       { $unwind: '$items'}, 
       { $sort: { 'items.pubDate': -1 } },
-      { $limit: options.perPage },
-      { $skip: options.perPage * options.page } )
+      { $skip: options.perPage * options.page },
+      { $limit: options.perPage } )
     .exec(cb);
   }, 
-  count: function (options, cb) {
+
+  count: function(options, cb) {
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
       { $project: { _id: 0, items: 1 } }, 
       { $unwind: '$items'},
       { $group: { _id: null, total: { $sum: 1 } } } )
     .exec(cb);
+  },
+
+  fetch: function(feeds, cb) {
+    // increase limit if server can handle more
+    async.eachLimit(feeds, 8, function (feed, cb) {
+
+    });
   }
 };
 

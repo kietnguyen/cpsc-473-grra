@@ -35,8 +35,8 @@ mongoose.connection.on('disconnected', function () {
 var app = express();
 app.locals.moment = require('moment');
 
-schedule.scheduleJob({minute:26}, function() {
-  console.log("it's 26");
+schedule.scheduleJob({minute:0}, function() {
+  feed.fetch();
 });
 
 // all environments
@@ -70,9 +70,11 @@ app.delete('/user', user.delete);
 
 // feed
 app.get('/user/:uid/feeds', feed.index);
+app.get('/user/:uid/feeds/refresh', feed.refresh);
 app.get('/user/:uid/feeds/new', feed.new);
 app.post('/user/:uid/feeds', feed.create);
-app.get('/user/:uid/feeds/:fid', feed.show);
+app.get('/user/:uid/feeds/:fid', feed.index);
+app.get('/user/:uid/feeds/:fid/refresh', feed.refresh);
 app.get('/user/:uid/feeds/:fid/edit', feed.edit);
 app.put('/user/:uid/feeds/:fid', feed.update);
 app.delete('/user/:uid/feeds/:fid', feed.delete);
