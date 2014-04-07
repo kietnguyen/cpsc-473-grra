@@ -62,7 +62,7 @@ app.get('/', routes.index);
 
 // user route
 app.get('/user/new', user.new);
-app.post('/user', user.create);
+app.post('/user/new', user.create);
 app.get('/user', user.show);
 app.get('/user/edit', user.edit);
 app.put('/user', user.update);
