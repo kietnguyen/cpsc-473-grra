@@ -1,0 +1,13 @@
+extends ../layout
+
+block content
+    h1 EDIT 
+    form(method='post', action='/user/#{uid}/feeds/#{fid}')
+      p
+        label Title :
+        input(type='text', name='title',placeholder='Enter new title', size='100' )
+      
+      P
+        input(type='submit', value='SAVE')
+
+    script

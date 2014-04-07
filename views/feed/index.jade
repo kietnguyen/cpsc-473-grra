@@ -2,11 +2,14 @@ extends ../layout
 
 block content
   - if (feedItems.length)
+    a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
+
     - each item in feedItems
       .feed
         h3
           a(href='#{item.url}') #{item.title}
-        p !{item.description}
+        p.desciption 
+          !{item.description}
         
         .meta
           span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')} 

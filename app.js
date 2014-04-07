@@ -73,10 +73,11 @@ app.get('/user/:uid/feeds', feed.index);
 app.get('/user/:uid/feeds/refresh', feed.refresh);
 app.get('/user/:uid/feeds/new', feed.new);
 app.post('/user/:uid/feeds', feed.create);
+
 app.get('/user/:uid/feeds/:fid', feed.index);
 app.get('/user/:uid/feeds/:fid/refresh', feed.refresh);
 app.get('/user/:uid/feeds/:fid/edit', feed.edit);
-app.put('/user/:uid/feeds/:fid', feed.update);
+app.post('/user/:uid/feeds/:fid', feed.update);
 app.delete('/user/:uid/feeds/:fid', feed.delete);
 
 
