@@ -17,6 +17,7 @@ autoIncrement.initialize(connection);
 
 var FeedSchema = new Schema({
   _id: { type: Number },
+  uid: [{ type: Number }],
   title: { type: String, trim: true },
   url:  { type: String, trim: true },
   description: { type: String, trim: true },
