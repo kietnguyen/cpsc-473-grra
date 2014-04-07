@@ -75,38 +75,40 @@ exports.create = function(req, res) {
 	  var stream = this
 		, meta = this.meta
 		, item;
-
+	  
+	  var theArray = [];
 	  while (item = stream.read()) {
-		console.log(item.title);
+
+		var theItem = {
+			title: item.title,
+			url: item.link,
+			description: item.description,
+			pubDate: item.pubdate,
+			author: item.author
+		};
+		theArray.push(theItem);
+
 	  }
 	  
-	});
-
-	redirect("/", res);
-/*
-  var newFeed = new Feed({
-    _id: {  },
-	title: {  },
-	url:  {  },
-	description: {  },
-	items: [
-	{
-	  title: {  },
-	  url: {  },
-	  description: {  },
-	  pubDate: {  },
-	  author: {  }
-	}]
-  });
+	  var newFeed = new Feed({
+		uid: 1,
+		title: meta.title,
+		url:  meta.link,
+		description: meta.description,
+		items: theArray
+      });
+	  
   
   newFeed.save( function(error, data){
     if(error){
         return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
     }
     else{
-        redirect("/", res);
     }
-  })*/
+  })
+  
+	});
+redirect("/", res);
 };
 
 // show a feed or all feeds of a user
