@@ -75,6 +75,20 @@ FeedSchema.statics = {
   loadFromUrl: function(url, cb) {
     this.findOne({url: url})
     .exec(cb);
+  },
+
+  getFeedsByUserId: function(uid, cb) {
+    this.find(
+      { uid: uid },
+      { _id: 1 })
+    .exec(cb);
+  },
+
+  getAllFeeds: function(cb) {
+    this.find(
+      { uid: { $not: { $size: 0 } } }, 
+      { _id:1 } )
+    .exec(cb);
   }
 
 };
