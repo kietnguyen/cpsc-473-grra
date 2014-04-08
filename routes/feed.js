@@ -9,7 +9,6 @@ var _ = require('underscore'),
     request = require('request'),
     async = require('async'),
     Feed = mongoose.model('Feed'),
-    User = mongoose.model('User'),
     errorHandler = require('./error');
 
 var request = require('request');
@@ -26,7 +25,6 @@ var feedIndex = function (err, res, feedItems, options) {
   }
 
   //console.dir(feedItems);
-  feedItems = _.map(feedItems, function(val) { return val.items; });
   return res.render('./feed/index', {
     title: 'GRRA | Feeds',
     feedItems: feedItems,
@@ -35,7 +33,7 @@ var feedIndex = function (err, res, feedItems, options) {
     feedTitle: "",
     page: options.page + 1,
     pages: Math.ceil(options.totalItems / options.perPage)
-  });  
+  });
 };
 
 exports.new = function(req, res) {
@@ -52,6 +50,7 @@ exports.new = function(req, res) {
 };
 
 exports.create = function(req, res) {
+<<<<<<< HEAD
 	//use example: http://leoville.tv/podcasts/sn.xml
 	
 	var uid = req.params.uid;
@@ -146,24 +145,116 @@ exports.create = function(req, res) {
 	
 	var redirectUrl = "/user/" + uid + "/feeds/";
 	redirect("/", res);
+=======
+  //use example: http://leoville.tv/podcasts/sn.xml
+
+  var uid = req.params.uid;
+
+  var flag = true;
+  var req = request(req.body.url)
+  , feedparser = new FeedParser();
+
+  req.on('error', function (error) {
+    return errorHandler.loadPage(404, new Error('Error reading request'), res);
+  });
+
+  req.on('response', function (res) {
+    var stream = this;
+
+    if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
+
+    stream.pipe(feedparser);
+  });
+
+  feedparser.on('error', function(error) {
+    return errorHandler.loadPage(404, new Error('Error parsing'), res);
+  });
+
+  feedparser.on('readable', function() {
+    var stream = this
+    , meta = this.meta
+    , item;
+
+    var theArray = [];
+    var theItem;
+    while (item = stream.read()) {
+
+      theItem = {
+        title: item.title,
+        url: item.link,
+        description: item.description,
+        pubDate: item.pubdate,
+        author: item.author
+      };
+      theArray.push(theItem);
+
+    }
+
+    if(flag === true) {
+      Feed.find({'title': meta.title}, function(err, theResult) {
+        if(theResult.length) {
+          Feed.find({'title': meta.title, 'uid': {$in: [uid]} }, function (err1, theResult1) {
+            if(theResult1.length) {
+              // uid is already stored
+            }
+            else {
+              Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
+            }
+          });
+        }
+        else {
+          var newFeed = new Feed({
+            uid: uid,
+            title: meta.title,
+            url:  meta.link,
+            description: meta.description,
+          });
+
+          newFeed.save( function(error, data){
+            if(error){
+              return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
+            }
+            else{
+            }
+          })
+        }
+      });
+
+      flag = false;
+
+    }
+
+    Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) {
+      if (err) {
+        console.log("error");
+      }
+    });
+
+  });
+
+  var redirectUrl = "/user/" + uid + "/feeds/";
+  redirect("/", res);
+>>>>>>> ad04bd4b017d79a66e75b4839e9b536111e5c862
 };
 
 // show a feed or all feeds of a user
 exports.index = function(req, res) {
-  var uid = parseInt(req.params.uid), 
+  var uid = parseInt(req.params.uid),
       fid = parseInt(req.params.fid),
-      page = (req.param('page') > 0 ? req.param('page') : 1) - 1, 
+      page = (req.param('page') > 0 ? req.param('page') : 1) - 1,
       perPage = 4;
 
   if (isNaN(uid) || (req.params.fid !== undefined && isNaN(fid))) {
     return errorHandler.loadPage(404, new Error('uid or fid is NaN'), res);
   }
 
-  User.getFeedsByUserId(uid, function (err, userFeeds) {
+  Feed.getFeedsByUserId(uid, function (err, userFeeds) {
     if (err) {
       return errorHandler.loadPage(500, err, res);
     }
 
+    userFeeds = _.map(userFeeds, function(val) { return val._id; });
+    //console.dir(userFeeds);
     var options = {
       uid: uid,
       page: page,
@@ -172,11 +263,11 @@ exports.index = function(req, res) {
 
     if (req.params.fid === undefined) {
       // show all feeds
-      options.feeds = userFeeds.feeds;
+      options.feeds = userFeeds;
     } else {
       // show specific feed
-      if (!_.contains(userFeeds.feeds, fid)) {
-        return errorHandler.loadPage(404, new Error('userFeeds.feeds does not contain fid'), res);
+      if (!_.contains(userFeeds, fid)) {
+        return errorHandler.loadPage(404, new Error('userFeeds does not contain fid'), res);
       }
       options.feeds = [fid];
       options.fid = fid;
@@ -188,6 +279,7 @@ exports.index = function(req, res) {
         return errorHandler.loadPage(500, err, res);
       }
 
+      feedItems = _.map(feedItems, function(val) { return val.items; });
       Feed.getNumOfItems(options, function(err, total) {
         if (err) {
           console.error(err);
@@ -206,7 +298,7 @@ exports.edit = function(req, res) {
   var uid = parseInt(req.params.uid),
       fid = parseInt(req.params.fid);
 
-      
+
   res.render('feed/edit',{
     title: req.params.title,
     url : req.params.url,
@@ -216,20 +308,21 @@ exports.edit = function(req, res) {
 };
 
 exports.update = function(req, res) {
-  var uid = parseInt(req.params.uid), 
-    fid = parseInt(req.params.fid);
-  
+  var uid = parseInt(req.params.uid),
+      fid = parseInt(req.params.fid);
+
   var title = req.body.title;
   Feed.update({ _id: fid }, {$set: { title: title}}, function(err){
     if (err) console.error(err);
-      res.redirect('/user/' + uid + '/feeds/' + fid);
+    res.redirect('/user/' + uid + '/feeds/' + fid);
   });
 };
 
 exports.delete = function(req, res) {
-  var uid = parseInt(req.params.uid), 
+  var uid = parseInt(req.params.uid),
       fid = parseInt(req.params.fid);
 
+<<<<<<< HEAD
 	// removes uid from the feed it's associated with
 	Feed.update(
 		{'_id': fid, 'uid': uid }, 
@@ -239,6 +332,16 @@ exports.delete = function(req, res) {
 	);
 	
 /*
+=======
+  Feed.update(
+    {'_id': fid, 'uid': uid },
+    { $pull: { "uid" : uid } },
+    false,
+    true
+  );
+
+  /*
+>>>>>>> ad04bd4b017d79a66e75b4839e9b536111e5c862
   Feed.remove({ _id: fid }, function(err) {
     if (err) {
        return errorHandler.loadPage(404, new Error('Invalid feed'), res);
@@ -248,6 +351,8 @@ exports.delete = function(req, res) {
 };
 
 var fetch = function(options, callback) {
+  var numOfFeeds = options.urls.length,
+      numOfCompletes = 0;
   async.each(options.urls, function (url) {
     console.log("Fetching ... " + url);
     var fReq = request(url),
@@ -258,7 +363,7 @@ var fetch = function(options, callback) {
     .setHeader('accept', 'text/html,application/xhtml+xml');
 
     fReq.on('error', function(err) {
-      if (err) console.error(err);
+      if (err) { callback(err); }
     });
 
     fReq.on('response', function (res) {
@@ -269,14 +374,18 @@ var fetch = function(options, callback) {
     });
 
     feedparser.on('error', function(err) {
-      if (err) console.error(err);
+      if (err) { callback(err); }
     });
     feedparser.on('end', function(err) {
-      if (err) console.error(err);
+      if (err) { callback(err); }
+
+      numOfCompletes++;
+      if (numOfCompletes === numOfFeeds)
+        callback();
     });
     feedparser.on('readable', function() {
-      var stream = this, 
-          meta = this.meta, 
+      var stream = this,
+          meta = this.meta,
           item;
 
       while (item = stream.read()) {
@@ -284,7 +393,7 @@ var fetch = function(options, callback) {
           title: item.title,
           url: item.link,
           description: item.description,
-          pubDate: item.pubdate, 
+          pubDate: item.pubdate,
           author: item.author
         };
 
@@ -301,10 +410,8 @@ var fetch = function(options, callback) {
                 if (err) console.error(err);
               });
           }
-          
-        })
+        });
       }
-
     });
   }, callback);
 };
@@ -317,45 +424,49 @@ exports.refresh = function (req, res) {
     return errorHandler.loadPage(404, new Error('uid or fid is NaN'), res);
   }
 
-  User.getFeedsByUserId(uid, function(err, userFeeds) {
+  Feed.getFeedsByUserId(uid, function(err, userFeeds) {
     if (err) {
       return errorHandler.loadPage(500, err, res);
     }
 
     var feedIds;
+    userFeeds = _.map(userFeeds, function(val) { return val._id; });
     if (req.params.fid === undefined) {
       // all feeds
-      feedIds = userFeeds.feeds;
+      feedIds = userFeeds;
     } else {
       // one feed
-      if (!_.contains(userFeeds.feeds, fid)) {
-        return errorHandler(404, new Error('userFeeds.feeds does not contain fid'), res);
+      if (!_.contains(userFeeds, fid)) {
+        return errorHandler(404, new Error('userFeeds does not contain fid'), res);
       }
       feedIds = [fid];
     }
 
     Feed.getFeedUrls(feedIds, function(err, urls) {
       if (err) {
-        return errorHandler.loadPage(500, new Error('Error: cannot get feeds\' urls'), res);
+        return errorHandler.loadPage(500, new Error('Cannot get feeds\' urls'), res);
       }
 
       var options = {
         urls: _.map(urls, function(val) { return val.url; })
       };
       fetch(options, function(err, fetchResult) {
-        if (err) console.error(err);
+        if (err) {
+          return errorHandler.loadPage(500, err, res);
+        }
         res.redirect(req.url.substring(0, req.url.length - 8));
-      });  
+      });
     });
   });
 };
 
 exports.refreshAll = function (req, res) {
-  User.getAllFeeds(function(err, allFeedIds) {
+  Feed.getAllFeeds(function(err, allFeedIds) {
     if (err) {
       return errorHandler.loadPage(500, err, res);
     }
 
+    allFeedIds = _.map(allFeedIds, function(val) { return val._id; });
     Feed.getFeedUrls(allFeedIds, function(err, urls) {
       if (err) {
         return console.error(err);
@@ -366,7 +477,7 @@ exports.refreshAll = function (req, res) {
       };
       fetch(options, function(err) {
         if (err) console.err(err);
-      });  
+      });
     });
 
   });

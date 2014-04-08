@@ -15,6 +15,7 @@
 * [HTTP Status Cats API](https://httpcats.herokuapp.com/)
 * [Nodejs Express Mongoose Demo](https://github.com/madhums/node-express-mongoose-demo)
 * [RSS 2.0 Specification](http://validator.w3.org/feed/docs/rss2.html)
+* [Epoch & Unix Timestamp Conversion Tools](http://www.epochconverter.com/)
 
 ## Q&A from Google
 * [Display date in nodejs jade](https://stackoverflow.com/questions/12419396/how-do-i-display-todays-date-in-nodejs-jade)
