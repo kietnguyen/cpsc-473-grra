@@ -225,11 +225,12 @@ exports.delete = function(req, res) {
       fid = parseInt(req.params.fid);
 
 	Feed.update(
-		{'_id': fid }, 
+		{'_id': fid, 'uid': uid }, 
 		{ $pull: { "uid" : uid } },
 		false,
 		true 
 	);
+	
 /*
   Feed.remove({ _id: fid }, function(err) {
     if (err) {
