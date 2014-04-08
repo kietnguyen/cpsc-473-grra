@@ -207,7 +207,7 @@ exports.update = function(req, res) {
   var title = req.body.title;
   Feed.update({ _id: fid }, {$set: { title: title}}, function(err){
     if (err) console.error(err);
-      res.redirect('/user/' + uid + '/feeds/'  fid);
+      res.redirect('/user/' + uid + '/feeds/' + fid);
   });
 };
 
