@@ -52,10 +52,10 @@ exports.new = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	//console.log(req.body.url);
 	//use example: http://leoville.tv/podcasts/sn.xml
-	console.log(req.params.uid);
+	
 	var uid = req.params.uid;
+	
 	var flag = true;
 	var req = request(req.body.url)
 	  , feedparser = new FeedParser();
@@ -71,7 +71,6 @@ exports.create = function(req, res) {
 
 	  stream.pipe(feedparser);
 	});
-
 
 	feedparser.on('error', function(error) {
 	  return errorHandler.loadPage(404, new Error('Error parsing'), res);
@@ -100,37 +99,47 @@ exports.create = function(req, res) {
 	  if(flag === true) {
 	  Feed.find({'title': meta.title}, function(err, theResult) {
 		if(theResult.length) {
-			console.log("exists");
-			Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
+			Feed.find({'title': meta.title, 'uid': {$in: [uid]} }, function (err1, theResult1) {
+				if(theResult1.length) {
+					// uid is already stored
+				}
+				else {
+					Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
+				}
+			});
 		}
 		else {
-	  var newFeed = new Feed({
-	    uid: uid,
-		title: meta.title,
-		url:  meta.link,
-		description: meta.description,
-      });
-	  
-	  newFeed.save( function(error, data){
-		if(error){
-			return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
-		}
-		else{
-		}
-	  })
-	  }
+		  var newFeed = new Feed({
+			uid: uid,
+			title: meta.title,
+			url:  meta.link,
+			description: meta.description,
+		  });
+		  
+		  newFeed.save( function(error, data){
+			if(error){
+				return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
+			}
+			else{
+			}
+		  })
+	    }
 	  });
-	  
-	  
+	    
 	  flag = false;
+	  
 	  }
 	  
-	  Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) { if (err) {console.log("error");}});
+	  Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) { 
+		if (err) {
+			console.log("error");
+		}
+	  });
   
 	});
 	
-	
-redirect("/", res);
+	var redirectUrl = "/user/" + uid + "/feeds/";
+	redirect("/", res);
 };
 
 // show a feed or all feeds of a user
@@ -215,11 +224,20 @@ exports.delete = function(req, res) {
   var uid = parseInt(req.params.uid), 
       fid = parseInt(req.params.fid);
 
+	Feed.update(
+		{'_id': fid, 'uid': uid }, 
+		{ $pull: { "uid" : uid } },
+		false,
+		true 
+	);
+	
+/*
   Feed.remove({ _id: fid }, function(err) {
     if (err) {
        return errorHandler.loadPage(404, new Error('Invalid feed'), res);
     }
   });
+  */
 };
 
 var fetch = function(options, callback) {
