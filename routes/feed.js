@@ -92,6 +92,8 @@ exports.create = function(req, res) {
 			pubDate: item.pubdate,
 			author: item.author
 		};
+		
+		// push the items to prepare for storage in database
 		theArray.push(theItem);
 
 	  }
@@ -104,11 +106,13 @@ exports.create = function(req, res) {
 					// uid is already stored
 				}
 				else {
+					// if the uid does not exist, store it in the uid array
 					Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
 				}
 			});
 		}
 		else {
+		  // create new feed entry
 		  var newFeed = new Feed({
 			uid: uid,
 			title: meta.title,
@@ -116,6 +120,7 @@ exports.create = function(req, res) {
 			description: meta.description,
 		  });
 		  
+		  // save the feed entry
 		  newFeed.save( function(error, data){
 			if(error){
 				return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
@@ -130,6 +135,7 @@ exports.create = function(req, res) {
 	  
 	  }
 	  
+	  // push the items into the items array in the database entry
 	  Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) { 
 		if (err) {
 			console.log("error");
@@ -224,6 +230,7 @@ exports.delete = function(req, res) {
   var uid = parseInt(req.params.uid), 
       fid = parseInt(req.params.fid);
 
+	// removes uid from the feed it's associated with
 	Feed.update(
 		{'_id': fid, 'uid': uid }, 
 		{ $pull: { "uid" : uid } },
