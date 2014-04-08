@@ -3,8 +3,9 @@
 
 require('../models/feed.js');
 
-var _ = require('underscore'),
-    mongoose = require('mongoose'),
+var mongoose = require('mongoose'),
+//    _ = require('underscore'),
+    _ = require('lodash'),
     FeedParser = require('feedparser'),
     request = require('request'),
     async = require('async'),
@@ -20,9 +21,7 @@ function redirect(location, res) {
 }
 
 var feedIndex = function (err, res, feedItems, options) {
-  if (err) {
-    return errorHandler.loadPage(500, err, res);
-  }
+  if (err) { return errorHandler.loadPage(500, err, res); }
 
   //console.dir(feedItems);
   return res.render('./feed/index', {
@@ -50,113 +49,113 @@ exports.new = function(req, res) {
 };
 
 exports.create = function(req, res) {
-	//use example: http://leoville.tv/podcasts/sn.xml
-	
-	var uid = req.params.uid;
-	
-	var flag = true;
-	
-	var req = request(req.body.url)
-	  , feedparser = new FeedParser();
+  //use example: http://leoville.tv/podcasts/sn.xml
 
-	req.on('error', function (error) {
-	  return errorHandler.loadPage(404, new Error('Error reading request'), res);
-	});
+  var uid = req.params.uid;
 
-	req.on('response', function (res) {
-	  var stream = this;
+  var flag = true;
 
-	  if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
+  var req = request(req.body.url)
+  , feedparser = new FeedParser();
 
-	  stream.pipe(feedparser);
-	});
+  req.on('error', function (error) {
+    return errorHandler.loadPage(404, new Error('Error reading request'), res);
+  });
 
-	feedparser.on('error', function(error) {
-	  return errorHandler.loadPage(404, new Error('Error parsing'), res);
-	});
+  req.on('response', function (res) {
+    var stream = this;
 
-	feedparser.on('readable', function() {
-	  var stream = this
-		, meta = this.meta
-		, item;
-	  
-	  var theArray = [];
-	  var theItem;
-	  var updateFlag = true;
-	  
-	  while (item = stream.read()) {
+    if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
 
-		theItem = {
-			title: item.title,
-			url: item.link,
-			description: item.description,
-			pubDate: item.pubdate,
-			author: item.author
-		};
-		
-		// push the items to prepare for storage in database
-		theArray.push(theItem);
+    stream.pipe(feedparser);
+  });
 
-	  }
-	  
-	  if(flag === true) {
-	  Feed.find({'title': meta.title}, function(err, theResult) {
-		if(theResult.length) {
-			Feed.find({'title': meta.title, 'uid': {$in: [uid]} }, function (err1, theResult1) {
-				if(theResult1.length) {
-					// uid is already stored
-				}
-				else {
-					// if the uid does not exist, store it in the uid array
-					Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
-				}
-			});
-			console.log("flag is false");
-			updateFlag = false;
-		}
-		else {
-		  // create new feed entry
-		  var newFeed = new Feed({
-			uid: uid,
-			title: meta.title,
-			url:  meta.link,
-			description: meta.description,
-		  });
-		  
-		  // save the feed entry
-		  newFeed.save( function(error, data){
-			if(error){
-				return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
-			}
-			else{
-			}
-		  })
-	    }
-	  });
-	    
-	  flag = false;
-	  
-	  }
-	  
-	  // push the items into the items array in the database entry
-	  // find to see if item is already in the field
-	  Feed.find({title: meta.title, items: {$elemMatch: {'title': theItem.title} } }, function(err, result) {
-		if (result.length) {
-		}
-		else {
-		  // if item is not there, add it to the entry
-		  Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) { 
-			if (err) {
-				console.log("error");
-			}
-		  });
-		}
-		});
-	  });
-  
-	
-	var redirectUrl = "/user/" + uid + "/feeds/";
-	redirect(redirectUrl, res);
+  feedparser.on('error', function(error) {
+    return errorHandler.loadPage(404, new Error('Error parsing'), res);
+  });
+
+  feedparser.on('readable', function() {
+    var stream = this
+    , meta = this.meta
+    , item;
+
+    var theArray = [];
+    var theItem;
+    var updateFlag = true;
+
+    while (item = stream.read()) {
+
+      theItem = {
+        title: item.title,
+        url: item.link,
+        description: item.description,
+        pubDate: item.pubdate,
+        author: item.author
+      };
+
+      // push the items to prepare for storage in database
+      theArray.push(theItem);
+
+    }
+
+    if(flag === true) {
+      Feed.find({'title': meta.title}, function(err, theResult) {
+        if(theResult.length) {
+          Feed.find({'title': meta.title, 'uid': {$in: [uid]} }, function (err1, theResult1) {
+            if(theResult1.length) {
+              // uid is already stored
+            }
+            else {
+              // if the uid does not exist, store it in the uid array
+              Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
+            }
+          });
+          console.log("flag is false");
+          updateFlag = false;
+        }
+        else {
+          // create new feed entry
+          var newFeed = new Feed({
+            uid: uid,
+            title: meta.title,
+            url:  meta.xmlurl,
+            description: meta.description,
+          });
+
+          // save the feed entry
+          newFeed.save( function(error, data){
+            if(error){
+              return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
+            }
+            else{
+            }
+          })
+        }
+      });
+
+      flag = false;
+
+    }
+
+    // push the items into the items array in the database entry
+    // find to see if item is already in the field
+    Feed.find({title: meta.title, items: {$elemMatch: {'title': theItem.title} } }, function(err, result) {
+      if (result.length) {
+      }
+      else {
+        // if item is not there, add it to the entry
+        Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) {
+          if (err) {
+            console.log("error");
+          }
+        });
+      }
+    });
+  });
+
+
+  var redirectUrl = "/user/" + uid + "/feeds/";
+  redirect(redirectUrl, res);
 };
 
 // show a feed or all feeds of a user
@@ -244,14 +243,14 @@ exports.delete = function(req, res) {
   var uid = parseInt(req.params.uid),
       fid = parseInt(req.params.fid);
 
-	// removes uid from the feed it's associated with
-	Feed.update(
-		{'_id': fid, 'uid': uid }, 
-		{ $pull: { "uid" : uid } },
-		false,
-		true 
-	);
-	
+  // removes uid from the feed it's associated with
+  Feed.update(
+    {'_id': fid, 'uid': uid },
+    { $pull: { "uid" : uid } },
+    false,
+    true
+  );
+
 
 };
 
@@ -381,7 +380,7 @@ exports.refreshAll = function (req, res) {
         urls:  _.map(urls, function(val) { return val.url; })
       };
       fetch(options, function(err) {
-        if (err) console.err(err);
+        if (err) { console.err(err); }
       });
     });
 

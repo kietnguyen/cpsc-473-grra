@@ -70,8 +70,8 @@ app.get("/user/signup", user.new);
 app.post("/user/signup", user.create);
 app.get("/user/logout", user.logout);
 app.get('/user', user.isAuthenticated, user.show); //preliminary test for navigating to authenticated pages
-app.get('/user/edit', user.edit);
-app.put('/user', user.update);
+app.get('/user/:uid/edit', user.getupdate);
+app.post('/user/:uid/update', user.update);
 app.delete('/user', user.delete);
 
 // feed
@@ -79,7 +79,6 @@ app.get('/user/:uid/feeds', feed.index);
 app.get('/user/:uid/feeds/refresh', feed.refresh);
 app.get('/user/:uid/feeds/new', feed.new);
 app.post('/user/:uid/feeds', feed.create);
-
 app.get('/user/:uid/feeds/:fid', feed.index);
 app.get('/user/:uid/feeds/:fid/refresh', feed.refresh);
 app.get('/user/:uid/feeds/:fid/edit', feed.edit);

@@ -22,7 +22,7 @@ UserSchema.path('user').required(true, 'Username cannot be blank');
 UserSchema.path('pass').required(true, 'Password cannot be blank');
 
 UserSchema.methods = {
-  
+
 };
 
 UserSchema.statics = {

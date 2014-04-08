@@ -4,7 +4,6 @@
 require('./user.js');
 
 var mongoose = require('mongoose'),
-    _ = require('underscore'),
     autoIncrement = require('mongoose-auto-increment'),
     env = process.env.NODE_ENV || 'development',
     config = require('../config/config')[env],

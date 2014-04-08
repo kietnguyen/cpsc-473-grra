@@ -22,6 +22,7 @@
     "node-schedule": "^0.1.13",
     "http": "*",
     "mongodb": "*",
-    "request": "^2.34.0"
+    "request": "^2.34.0",
+    "lodash": "^2.4.1"
   }
 }
