@@ -50,6 +50,8 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(helpers());
+app.use(express.cookieParser());
+app.use(express.session({secret:"$ecreT"}));
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -64,9 +66,10 @@ app.get('/', routes.index);
 // user route
 app.get("/user/login", user.showLogin);
 app.post("/user/login", user.login);
-app.get('/user/new', user.new);
-app.post('/user/new', user.create);
-app.get('/user', user.show);
+app.get("/user/signup", user.new);
+app.post("/user/signup", user.create);
+app.get("/user/logout", user.logout);
+app.get('/user', user.isAuthenticated, user.show); //preliminary test for navigating to authenticated pages
 app.get('/user/edit', user.edit);
 app.put('/user', user.update);
 app.delete('/user', user.delete);
