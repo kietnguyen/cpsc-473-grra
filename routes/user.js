@@ -52,6 +52,10 @@ exports.showLogin = function(req, res){
 	res.render("login", {title:"GRRA | User Login"});
 }
 
+exports.login = function(req, res) {
+	res.send("user.login");
+};
+
 exports.show = function(req, res) {
   res.send("user.show");
 };
