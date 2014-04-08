@@ -55,6 +55,7 @@ exports.create = function(req, res) {
 	var uid = req.params.uid;
 	
 	var flag = true;
+	
 	var req = request(req.body.url)
 	  , feedparser = new FeedParser();
 
@@ -81,6 +82,8 @@ exports.create = function(req, res) {
 	  
 	  var theArray = [];
 	  var theItem;
+	  var updateFlag = true;
+	  
 	  while (item = stream.read()) {
 
 		theItem = {
@@ -108,6 +111,8 @@ exports.create = function(req, res) {
 					Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
 				}
 			});
+			console.log("flag is false");
+			updateFlag = false;
 		}
 		else {
 		  // create new feed entry
@@ -134,16 +139,24 @@ exports.create = function(req, res) {
 	  }
 	  
 	  // push the items into the items array in the database entry
-	  Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) { 
-		if (err) {
-			console.log("error");
+	  // find to see if item is already in the field
+	  Feed.find({title: meta.title, items: {$elemMatch: {'title': theItem.title} } }, function(err, result) {
+		if (result.length) {
 		}
+		else {
+		  // if item is not there, add it to the entry
+		  Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) { 
+			if (err) {
+				console.log("error");
+			}
+		  });
+		}
+		});
 	  });
   
-	});
 	
 	var redirectUrl = "/user/" + uid + "/feeds/";
-	redirect("/", res);
+	redirect(redirectUrl, res);
 };
 
 // show a feed or all feeds of a user
@@ -239,23 +252,7 @@ exports.delete = function(req, res) {
 		true 
 	);
 	
-/*
-=======
-  Feed.update(
-    {'_id': fid, 'uid': uid },
-    { $pull: { "uid" : uid } },
-    false,
-    true
-  );
 
-  /*
->>>>>>> ad04bd4b017d79a66e75b4839e9b536111e5c862
-  Feed.remove({ _id: fid }, function(err) {
-    if (err) {
-       return errorHandler.loadPage(404, new Error('Invalid feed'), res);
-    }
-  });
-  */
 };
 
 var fetch = function(options, callback) {
