@@ -4,9 +4,8 @@
 require('./user.js');
 
 var mongoose = require('mongoose'),
-    async = require('async'),
+    _ = require('underscore'),
     autoIncrement = require('mongoose-auto-increment'),
-    feedparser = require('feedparser'),
     env = process.env.NODE_ENV || 'development',
     config = require('../config/config')[env],
     Schema = mongoose.Schema,
@@ -21,12 +20,13 @@ var FeedSchema = new Schema({
   title: { type: String, trim: true },
   url:  { type: String, trim: true },
   description: { type: String, trim: true },
+  uids: { type: Number, ref: 'User' },
   lastUpdate: { type: Date },
   items: [{
     title: { type: String, trim: true },
     url: { type: String, trim: true },
     description: { type: String, trim: true },
-    pubDate: {type: Date, required: true },
+    pubDate: {type: Date, required: true }, // break if feed doesn't have this
     author: { type: String, trim: true }
   }]
 });
@@ -54,7 +54,8 @@ FeedSchema.statics = {
     .exec(cb);
   }, 
 
-  count: function(options, cb) {
+  // Count number of feed items
+  getNumOfItems: function(options, cb) {
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
       { $project: { _id: 0, items: 1 } }, 
@@ -63,12 +64,19 @@ FeedSchema.statics = {
     .exec(cb);
   },
 
-  fetch: function(feeds, cb) {
-    // increase limit if server can handle more
-    async.eachLimit(feeds, 8, function (feed, cb) {
+  // Get feed urls from feed ids
+  getFeedUrls: function(feedIds, cb) {
+    this.aggregate(
+      { $match: { _id: { $in: feedIds } } },
+      { $project: { _id: 0, url: 1 } })
+    .exec(cb);
+  },
 
-    });
+  loadFromUrl: function(url, cb) {
+    this.findOne({url: url})
+    .exec(cb);
   }
+
 };
 
 FeedSchema.plugin(autoIncrement.plugin, 'Feed');

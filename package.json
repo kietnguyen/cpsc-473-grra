@@ -20,8 +20,8 @@
     "moment": "^2.5.1",
     "async": "^0.6.2",
     "node-schedule": "^0.1.13",
-	"http": "*",
-	"mongodb": "*",
-	"request": "*"
+    "http": "*",
+    "mongodb": "*",
+    "request": "^2.34.0"
   }
 }

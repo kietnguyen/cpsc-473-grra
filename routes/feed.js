@@ -5,6 +5,9 @@ require('../models/feed.js');
 
 var _ = require('underscore'),
     mongoose = require('mongoose'),
+    FeedParser = require('feedparser'),
+    request = require('request'),
+    async = require('async'),
     Feed = mongoose.model('Feed'),
     User = mongoose.model('User'),
     errorHandler = require('./error');
@@ -14,7 +17,7 @@ var FeedParser = require('feedparser');
 
 //redirecting using the express method
 function redirect(location, res) {
-    res.redirect(303, location);
+  res.redirect(303, location);
 }
 
 var feedIndex = function (err, res, feedItems, options) {
@@ -28,49 +31,11 @@ var feedIndex = function (err, res, feedItems, options) {
     title: 'GRRA | Feeds',
     feedItems: feedItems,
     uid: options.uid,
+    fid: options.fid,
+    feedTitle: "",
     page: options.page + 1,
     pages: Math.ceil(options.totalItems / options.perPage)
   });  
-};
-
-// show all feeds from a user
-exports.index = function(req, res) {
-  var uid = parseInt(req.params.uid), 
-      page = (req.param('page') > 0 ? req.param('page') : 1) - 1, 
-      perPage = 4;
-
-  if (isNaN(uid)) {
-    return errorHandler(404, 'uid is NaN', res);
-  }
-
-  User.getFeedsByUserId(uid, function (err, user) {
-    if (err) {
-      return errorHandler.loadPage(500, err, res);
-    }
-
-    var options = {
-      uid: uid,
-      feeds: user.feeds,
-      page: page,
-      perPage: perPage
-    };
-
-    Feed.list(options, function(err, feedItems) {
-      if (err) {
-        return errorHandler.loadPage(500, err, res);
-      }
-
-      Feed.count(options, function(err, total) {
-        if (err) {
-          console.error(err);
-          return errorHandler.loadPage(500, err, res);
-        }
-        options.totalItems = total[0].total;
-        feedIndex(err, res, feedItems, options);
-      });
-    });
-
-  });
 };
 
 exports.new = function(req, res) {
@@ -184,10 +149,6 @@ exports.index = function(req, res) {
       return errorHandler.loadPage(500, err, res);
     }
 
-    if (!_.contains(user.feeds, fid)) {
-      return errorHandler(404, new Error('user.feeds does not contain fid'), res);
-    }
-
     var options = {
       uid: uid,
       page: page,
@@ -198,10 +159,12 @@ exports.index = function(req, res) {
       // show all feeds
       options.feeds = userFeeds.feeds;
     } else {
+      // show specific feed
       if (!_.contains(userFeeds.feeds, fid)) {
-        return errorHandler(404, new Error('userFeeds.feeds does not contain fid'), res);
+        return errorHandler.loadPage(404, new Error('userFeeds.feeds does not contain fid'), res);
       }
       options.feeds = [fid];
+      options.fid = fid;
     }
 
     Feed.list(options, function(err, feedItems) {
@@ -210,12 +173,13 @@ exports.index = function(req, res) {
         return errorHandler.loadPage(500, err, res);
       }
 
-      Feed.count(options, function(err, total) {
+      Feed.getNumOfItems(options, function(err, total) {
         if (err) {
           console.error(err);
           return errorHandler.loadPage(500, err, res);
         }
-        options.totalItems = total[0].total;
+
+        options.totalItems = (total.length === 0 ? 0 : total[0].total);
         feedIndex(err, res, feedItems, options);
       });
     });
@@ -224,22 +188,100 @@ exports.index = function(req, res) {
 };
 
 exports.edit = function(req, res) {
-  res.send("feed.edit");
+  var uid = parseInt(req.params.uid),
+      fid = parseInt(req.params.fid);
+
+      
+  res.render('feed/edit',{
+    title: req.params.title,
+    url : req.params.url,
+    uid: uid,
+    fid: fid
+  });
 };
 
 exports.update = function(req, res) {
-  res.send("feed.update");
+  var uid = parseInt(req.params.uid), 
+    fid = parseInt(req.params.fid);
+  
+  var title = req.body.title;
+  Feed.update({ _id: fid }, {$set: { title: title}}, function(err){
+    if (err) console.error(err);
+      res.redirect('/user/' + uid + '/feeds/'  fid);
+  });
 };
 
 exports.delete = function(req, res) {
   var uid = parseInt(req.params.uid), 
       fid = parseInt(req.params.fid);
-  
+
   Feed.remove({ _id: fid }, function(err) {
     if (err) {
-       return errorHandler(404, new Error('Invalid feed'), res);
+       return errorHandler.loadPage(404, new Error('Invalid feed'), res);
     }
   });
+};
+
+var fetch = function(options, callback) {
+  async.each(options.urls, function (url) {
+    console.log("Fetching ... " + url);
+    var fReq = request(url),
+        feedparser = new FeedParser();
+
+    fReq.setMaxListeners(50);
+    fReq.setHeader('user-agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36')
+    .setHeader('accept', 'text/html,application/xhtml+xml');
+
+    fReq.on('error', function(err) {
+      if (err) console.error(err);
+    });
+
+    fReq.on('response', function (res) {
+      var stream = this;
+      if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
+
+      stream.pipe(feedparser);
+    });
+
+    feedparser.on('error', function(err) {
+      if (err) console.error(err);
+    });
+    feedparser.on('end', function(err) {
+      if (err) console.error(err);
+    });
+    feedparser.on('readable', function() {
+      var stream = this, 
+          meta = this.meta, 
+          item;
+
+      while (item = stream.read()) {
+        var newItem = {
+          title: item.title,
+          url: item.link,
+          description: item.description,
+          pubDate: item.pubdate, 
+          author: item.author
+        };
+
+        Feed.count({'items.url': item.link}, function(err, result) {
+          if (err) return console.error(err);
+
+          if (result === 0) {
+            console.log(" - Adding ... " + newItem.url);
+            Feed.update(
+              { url: url },
+              { $push: { items: newItem } },
+              { upsert: true },
+              function(err) {
+                if (err) console.error(err);
+              });
+          }
+          
+        })
+      }
+
+    });
+  }, callback);
 };
 
 exports.refresh = function (req, res) {
@@ -255,28 +297,52 @@ exports.refresh = function (req, res) {
       return errorHandler.loadPage(500, err, res);
     }
 
-    var feeds;
+    var feedIds;
     if (req.params.fid === undefined) {
       // all feeds
-      feeds = userFeeds.feeds;
+      feedIds = userFeeds.feeds;
     } else {
       // one feed
       if (!_.contains(userFeeds.feeds, fid)) {
         return errorHandler(404, new Error('userFeeds.feeds does not contain fid'), res);
       }
-      feeds = [fid];
+      feedIds = [fid];
     }
 
-    Feed.fetch(feeds);
+    Feed.getFeedUrls(feedIds, function(err, urls) {
+      if (err) {
+        return errorHandler.loadPage(500, new Error('Error: cannot get feeds\' urls'), res);
+      }
+
+      var options = {
+        urls: _.map(urls, function(val) { return val.url; })
+      };
+      fetch(options, function(err, fetchResult) {
+        if (err) console.error(err);
+        res.redirect(req.url.substring(0, req.url.length - 8));
+      });  
+    });
   });
 };
 
-exports.fetch = function (req, res) {
-  User.getAllFeeds(function(err, allFeeds) {
+exports.refreshAll = function (req, res) {
+  User.getAllFeeds(function(err, allFeedIds) {
     if (err) {
       return errorHandler.loadPage(500, err, res);
     }
 
-    Feed.fetch(allFeeds);
+    Feed.getFeedUrls(allFeedIds, function(err, urls) {
+      if (err) {
+        return console.error(err);
+      }
+
+      var options = {
+        urls:  _.map(urls, function(val) { return val.url; })
+      };
+      fetch(options, function(err) {
+        if (err) console.err(err);
+      });  
+    });
+
   });
 };

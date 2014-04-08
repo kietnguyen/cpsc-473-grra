@@ -7,7 +7,9 @@
 * [view-helpers](https://github.com/madhums/node-view-helpers)
 
 ## Template engines
-* [jade](http://jade-lang.com/reference)
+* jade
+  * [Language Reference (Official)](http://jade-lang.com/reference)
+  * [Jade Syntax Documentation by example](http://naltatis.github.io/jade-syntax-docs/)
 
 ## References
 * [HTTP Status Cats API](https://httpcats.herokuapp.com/)
