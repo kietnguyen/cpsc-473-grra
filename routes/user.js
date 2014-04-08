@@ -4,28 +4,27 @@
 var mongo = require("mongodb").MongoClient;
 
 //LL - Check if the desired username already exists
-function DoesUserExist(req, res){
+function DoesUserExist(req, res, callback){//(req, res){
 	var post = req.body;
 
 	mongo.connect("mongodb://localhost:27017/grra_dev", function(err, db){
 		if(err) { return console.dir(err); }
 
 		var collection = db.collection("users");
-		collection.find({username: post.username}).count( function( err, count ){
+		collection.find({username: post.username}).count(function(err, count){
 			if (count > 0){
-				console.log(count);
-				return true; //already exists
+				res.redirect("/");
 			}
 			else{
-				console.log(count);
-				return false; //does not exist
+				callback(req);
+				res.redirect("/user");
 			}
 		});
 	});
 }
 
 //LL - Create the user 
-function CreateUser(req, res){
+function CreateUser(req){//(req, res){
 	var post = req.body;
 
 	//connect to db server
@@ -46,20 +45,12 @@ exports.new = function(req, res) {
 
 //LL - called on 'user/new' POST
 exports.create = function(req, res) {
-	var exists = DoesUserExist(req, res);
-	console.log(exists);
-	if (exists === true){
-		console.log("exists");
-		res.redirect('/user/new');
-	}
-	else{
-		//good to create user since it does not exist yet
-		CreateUser(req, res);
-		console.log("does not");
-		res.redirect('/user/new');
-	}
-  	//res.send("user.create");
+	DoesUserExist(req, res, CreateUser);
 };
+
+exports.showLogin = function(req, res){
+	res.render("login", {title:"GRRA | User Login"});
+}
 
 exports.show = function(req, res) {
   res.send("user.show");

@@ -61,6 +61,8 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 
 // user route
+app.get("/user/login", user.showLogin);
+app.post("/user/login", user.login);
 app.get('/user/new', user.new);
 app.post('/user/new', user.create);
 app.get('/user', user.show);
