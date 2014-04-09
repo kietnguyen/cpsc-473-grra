@@ -9,8 +9,11 @@ block content
       // Feed title
       h1 
       // Feed controller
-      a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH
+      a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH&nbsp;&nbsp;&nbsp;
       a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
+      form(method='POST', action='/user/#{uid}/feeds/#{fid}')
+        input(type='hidden', name='_method', value='DELETE')
+        button.btn.btn-primary(type='submit') Unsubscribe
     - each item in feedItems
       .panel.panel-default
           .panel-heading  

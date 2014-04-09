@@ -4,7 +4,7 @@
 require('../models/feed.js');
 
 var mongoose = require('mongoose'),
-//    _ = require('underscore'),
+    //    _ = require('underscore'),
     _ = require('lodash'),
     FeedParser = require('feedparser'),
     request = require('request'),
@@ -247,9 +247,11 @@ exports.delete = function(req, res) {
   Feed.update(
     {'_id': fid, 'uid': uid },
     { $pull: { "uid" : uid } },
-    false,
-    true
+    function(err) {}
   );
+  
+  var redirectUrl = "/user/" + uid + "/feeds/";
+  redirect(redirectUrl, res);
 
 
 };
@@ -316,6 +318,7 @@ var fetch = function(options, callback) {
           }
         });
       }
+
     });
   }, callback);
 };
@@ -380,7 +383,7 @@ exports.refreshAll = function (req, res) {
         urls:  _.map(urls, function(val) { return val.url; })
       };
       fetch(options, function(err) {
-        if (err) { console.err(err); }
+        if (err) { console.error(err); }
       });
     });
 
