@@ -54,14 +54,14 @@ block content
         - else
           // For single feed
           // Feed title
-          h1= feedTitles[0].title
+          h2= feedTitles[0].title
           // Feed controller
-          a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH
-          | &nbsp;&nbsp;&nbsp;
-          a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
           form(method='POST', action='/user/#{uid}/feeds/#{fid}')
             input(type='hidden', name='_method', value='DELETE')
             button.btn.btn-primary(type='submit') Unsubscribe
+          a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH
+          | &nbsp;&nbsp;&nbsp;
+          //a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
         - each item in feedItems
           .feed
             h3
