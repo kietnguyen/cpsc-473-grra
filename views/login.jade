@@ -1,24 +1,50 @@
-extends layout
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width")
 
-block content
-  .panel.panel-default
-    .panel-heading
-      div(class="row")
-        div(class="col-md-6")
-          h3 GRRA - Login
-    .panel-body
-      form(method="POST", action="/user/login")
-        div(class="row")
-          div(class="col-md-offset-3 col-md-6")
-            div(class="panel panel-default")
-              div(class="panel-heading") Login
-              div(class="panel-body", style="padding:30px")
-                div(class="form-group")
-                  input(type="text", class="form-control", name="username", placeholder="Username")
-                div(class="form-group")
-                  input(type="password", class="form-control", name="password", placeholder="Password")
-                div
-                  input(type="submit", class="btn btn-primary", value="Login")
+    title= title
+
+    link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js")
+    script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
+    link(rel="stylesheet", href="/css/cover.css")
+
+  body
+      div(class="site-wrapper")
+        div(class="site-wrapper-inner")
+          div(class="cover-container")
+            div(class="masthead clearfix")
+              div(class="inner")
+                h3(class="masthead-brand") 
+                  a(href="/") Edify
+                ul(class="nav masthead-nav")
+                  li(class="active")
+                    a(href="/user/login") Login
+                  li
+                    a(href="#") About
+
+            div(class="inner cover")
+              form(method="POST", action="/user/login")
+                div(class="row")
+                  div(class="col-md-offset-3 col-md-6")
+                    div(class="panel panel-default")
+                      div(class="panel-heading") Login
+                      div(class="panel-body", style="padding:30px")
+                        div(class="form-group")
+                          input(type="text", class="form-control", name="username", placeholder="Username")
+                        div(class="form-group")
+                          input(type="password", class="form-control", name="password", placeholder="Password")
+                        div
+                          input(type="submit", class="btn btn-primary", value="Login")
+            div(class="mastfoot")
+              div(class="inner")
+                p © 2014 Edify
+                  
+
+      
+      
 
 
 

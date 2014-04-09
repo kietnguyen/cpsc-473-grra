@@ -1,20 +1,35 @@
-extends layout
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width")
 
-block content
-	.panel.panel-default
-		.panel-heading  
-			h3= title
-			br
-			br
-		.panel-body
-			br
-			br
-			form(role='form', method='get', action='/user/login')
-				div(class="col-md-offset-3 col-md-5")
-					button.btn.btn-primary.btn-lg.btn-block(type='submit') Log in
-				
-			form(role='form', method='get', action='/user/signup')
-				div(class="col-md-offset-3 col-md-5")
-					button.btn.btn-default.btn-lg.btn-block(type='submit') Sign up
-					br
-					br
+    title= title
+
+    link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js")
+    script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
+    link(rel="stylesheet", href="/css/cover.css")
+
+  body
+      div(class="site-wrapper")
+        div(class="site-wrapper-inner")
+          div(class="cover-container")
+            div(class="masthead clearfix")
+              div(class="inner")
+                h3(class="masthead-brand") 
+                  a(href="/") Edify
+                ul(class="nav masthead-nav")
+                  li
+                    a(href="/user/login") Login
+                  li
+                    a(href="#") About
+
+            div(class="inner cover")
+              h1(class="cover-heading") The world at your fingertips.
+              p(class="lead") Welcome to Edify. Get all the news you want delivered to you from wherever you are.
+              p(class="lead")
+                a(href="/user/signup" class="btn btn-lg btn-primary") Sign up
+            div(class="mastfoot")
+              div(class="inner")
+                p © 2014 Edify
