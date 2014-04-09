@@ -72,13 +72,7 @@ function authenticateUser(req, res){
         console.log("USER: '" + post.username + "'" + " invalid credentials");
         res.redirect("/user/login");
       }
-<<<<<<< HEAD
 	});
-
-    
-=======
-    });
->>>>>>> bdb745af59fd50735554c81cae887bd9f72942b1
   });
 }
 
