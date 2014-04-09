@@ -5,7 +5,7 @@
 exports.index = function(req, res) {
 	if (req.session.uid === undefined) {
 	  res.render('index',
-	             { title: "Google Reader's Replacement App" });
+	             { title: "Edify | News at your fingertips" });
 	} else {
 		res.redirect("/user/" + req.session.uid + "/feeds");
 	}

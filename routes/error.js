@@ -7,11 +7,11 @@ exports.loadPage = function (httpStatusCode, err, res) {
   switch (httpStatusCode) {
     case 404:
       return res.render('500', {
-        title: 'GRRA | Internal Server Error'
+        title: 'Edify | Internal Server Error'
       });
     case 500:
       return res.render('500', {
-        title: 'GRRA | Internal Server Error'
+        title: 'Edify | Internal Server Error'
       });
   }
 };

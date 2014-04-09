@@ -25,7 +25,7 @@ var feedIndex = function (err, res, feedItems, options) {
 
   //console.dir(feedItems);
   return res.render('./feed/index', {
-    title: 'GRRA | Feeds',
+    title: 'Edify | Feeds',
     feedItems: feedItems,
     uid: options.uid,
     fid: options.fid,
@@ -43,7 +43,7 @@ exports.new = function(req, res) {
   }
 
   res.render('feed/new', {
-    title: 'GRRA | Create a new feed',
+    title: 'Edify | Create a new feed',
     uid: uid
   });
 };

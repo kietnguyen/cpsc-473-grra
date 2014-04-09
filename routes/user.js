@@ -18,12 +18,13 @@ function doesUserExist(req, res, callback){
     collection.find({username: post.username}).count(function(err, count){
       if (count > 0){
         //username already exists
-        res.redirect("/");
+        console.log("Signup Error: " + post.username + " already exists");
+        res.redirect("/user/signup/error");
       }
       else{
         //username does not exist, create it
         callback(req);
-        res.redirect("/user/");
+        res.redirect("/user/login/success");
       }
     });
   });
@@ -50,35 +51,34 @@ function authenticateUser(req, res){
   var objectId;
   
   if (req.session.uid) {
-	res.redirect('/user/'+req.session.uid+'/feeds');  }
+    res.redirect('/user/'+req.session.uid+'/feeds');  
+  }
 
   mongo.connect("mongodb://localhost:27017/grra_dev", function(err, db){
     if(err) { return console.dir(err); }
 
     var collection = db.collection("users");
     collection.findOne({username: post.username, password: post.password},{_id:1}, function(err, doc) {
-      if (err) console.error(err);
+        if (err) console.error(err);
 
-
-
-      if (doc) {
-        console.log("USER: '" + post.username + "' successfully authenticated");
-        console.dir(doc);
-        console.log ("uid is : "+doc._id);
-        req.session.uid = doc._id;
-        res.redirect('/user/'+doc._id+'/feeds');
-      }
-      else {
-        console.log("USER: '" + post.username + "'" + " invalid credentials");
-        res.redirect("/user/login");
-      }
-	});
+        if (doc) {
+          console.log("USER: '" + post.username + "' successfully authenticated");
+          console.dir(doc);
+          console.log ("uid is : "+doc._id);
+          req.session.uid = doc._id;
+          res.redirect('/user/'+doc._id+'/feeds');
+        }
+        else {
+          console.log("USER: '" + post.username + "'" + " invalid credentials");
+          res.redirect("/user/login/error");
+        }
+  	});
   });
 }
 
 //LL - called on 'user/new' GET
 exports.new = function(req, res) {
-  res.render("user_new", { title: "GRRA | Create a new account" });
+  res.render("user_new", { title: "Edify | Create a new account" });
 };
 
 //LL - called on 'user/new' POST
@@ -88,7 +88,7 @@ exports.create = function(req, res) {
 
 //LL - serves login page
 exports.showLogin = function(req, res){
-  res.render("login", {title:"GRRA | User Login"});
+  res.render("login", {title:"Edify | User Login"});
 };
 
 //LL - attempts to authenticate user
