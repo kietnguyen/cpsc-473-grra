@@ -15,17 +15,24 @@ block content
         input(type='hidden', name='_method', value='DELETE')
         button.btn.btn-primary(type='submit') Unsubscribe
     - each item in feedItems
-      .feed
-        h3
-          a(href='#{item.url}') #{item.title}
-        .desciption
-          !{item.description}
-        
-        .meta
-          span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')} 
-          - if (item.author)
-            | &nbsp; | &nbsp;
-            span Author: #{item.author}
+      .panel.panel-default
+          .panel-heading  
+            .feed
+              h3
+                a(href='#{item.url}') #{item.title}
+          .panel-body
+          
+            .desciption
+              !{item.description}
+            
+            .meta
+              span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')} 
+              - if (item.author)
+                | &nbsp; | &nbsp;
+                span Author: #{item.author}
+      
+
+      
             
         
     - if (pages > 1)

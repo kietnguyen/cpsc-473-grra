@@ -80,11 +80,16 @@ exports.create = function(req, res) {
     , item;
 
     var theArray = [];
-    var theItem;
+    var theItem = {
+		title: "",
+		url: "",
+		description: "",
+		pubDate: "",
+		author: ""
+	};
     var updateFlag = true;
 
     while (item = stream.read()) {
-
       theItem = {
         title: item.title,
         url: item.link,
@@ -92,7 +97,6 @@ exports.create = function(req, res) {
         pubDate: item.pubdate,
         author: item.author
       };
-
       // push the items to prepare for storage in database
       theArray.push(theItem);
 
@@ -125,6 +129,7 @@ exports.create = function(req, res) {
           // save the feed entry
           newFeed.save( function(error, data){
             if(error){
+				console.log(error);
               return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
             }
             else{

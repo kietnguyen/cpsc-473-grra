@@ -4,14 +4,14 @@
 require('./user.js');
 
 var mongoose = require('mongoose'),
-//    autoIncrement = require('mongoose-auto-increment'),
+    autoIncrement = require('mongoose-auto-increment'),
     env = process.env.NODE_ENV || 'development',
     config = require('../config/config')[env],
     Schema = mongoose.Schema,
     User = mongoose.model('User');
 
-//var connection = mongoose.createConnection(config.db);
-//autoIncrement.initialize(connection);
+var connection = mongoose.createConnection(config.db);
+autoIncrement.initialize(connection);
 
 var FeedSchema = new Schema({
   _id: { type: Number },
@@ -97,5 +97,5 @@ FeedSchema.statics = {
 
 };
 
-//FeedSchema.plugin(autoIncrement.plugin, 'Feed');
+FeedSchema.plugin(autoIncrement.plugin, 'Feed');
 mongoose.model('Feed', FeedSchema);
