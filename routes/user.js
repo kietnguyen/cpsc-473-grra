@@ -50,7 +50,7 @@ function authenticateUser(req, res){
   var objectId;
 
   if (req.session.uid) {
-res.redirect('/user/'+req.session.uid+'/feeds');  }
+	res.redirect('/user/'+req.session.uid+'/feeds');  }
 
   mongo.connect("mongodb://localhost:27017/grra_dev", function(err, db){
     if(err) { return console.dir(err); }
@@ -70,7 +70,7 @@ res.redirect('/user/'+req.session.uid+'/feeds');  }
         console.log("USER: '" + post.username + "'" + " invalid credentials");
         res.redirect("/user/login");
       }
-    });
+	});
   });
 }
 
