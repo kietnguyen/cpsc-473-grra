@@ -47,22 +47,34 @@ function createUser(req){
 //LL - Attempt to log user in and create session cookie
 function authenticateUser(req, res){
   var post = req.body;
+  var objectId;
+  
+  if (req.session.uid) {
+res.redirect('/user/'+req.session.uid+'/feeds');  }
 
   mongo.connect("mongodb://localhost:27017/grra_dev", function(err, db){
     if(err) { return console.dir(err); }
 
     var collection = db.collection("users");
-    collection.find({username: post.username, password: post.password}).count( function( err, count ){
-      if (count === 1) {
+    collection.findOne({username: post.username, password: post.password},{_id:1}, function(err, doc) {
+      if (err) console.error(err);
+
+
+
+      if (doc) {
         console.log("USER: '" + post.username + "' successfully authenticated");
-        req.session.uid = post.username;
-        res.redirect("/");
+        console.dir(doc);
+        console.log ("uid is : "+doc._id);
+        req.session.uid = doc._id;
+        res.redirect('/user/'+doc._id+'/feeds');
       }
       else {
         console.log("USER: '" + post.username + "'" + " invalid credentials");
         res.redirect("/user/login");
       }
     });
+
+    
   });
 }
 
@@ -105,9 +117,6 @@ exports.logout = function(req, res){
   res.redirect("/user/login");
 }
 
-exports.login = function(req, res) {
-  res.send("user.login");
-};
 
 exports.show = function(req, res) {
   res.send("user.show");

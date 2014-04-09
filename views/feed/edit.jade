@@ -1,13 +1,15 @@
 extends ../layout
 
 block content
-    h1 EDIT 
-    form(method='post', action='/user/#{uid}/feeds/#{fid}')
-      p
-        label Title :
-        input(type='text', name='title',placeholder='Enter new title', size='100' )
-      
-      P
-        input(type='submit', value='SAVE')
+	.panel.panel-default
+		.panel-heading
+			h3 Edit the title
+		.panel-body		
+			br
+			form.form-inline(method='post', name='form1', action='/user/#{uid}/feeds/#{fid}',role='form')
 
-    script
+				.form-group
+					label.sr-only(for='exampleInputEmail2') Email address
+					input#exampleInputEmail2.form-control(type='text', name='title',placeholder='Enter new title', size='100' )
+					div(class="col-md-4")
+						button.btn.btn-primary.btn-lg.btn-block(type='submit') SAVE
