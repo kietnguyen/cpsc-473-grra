@@ -247,9 +247,11 @@ exports.delete = function(req, res) {
   Feed.update(
     {'_id': fid, 'uid': uid },
     { $pull: { "uid" : uid } },
-    false,
-    true
+    function(err) {}
   );
+  
+  var redirectUrl = "/user/" + uid + "/feeds/";
+  redirect(redirectUrl, res);
 
 
 };
