@@ -1,3 +1,3 @@
-{_id: 1, user: "a", pass: "a"}
-{_id: 2, user: "b", pass: "b"}
-{_id: 3, user: "c", pass: "c"}
+{_id: 1, username: "a", password: "a"}
+{_id: 2, username: "b", password: "b"}
+{_id: 3, username: "c", password: "c"}

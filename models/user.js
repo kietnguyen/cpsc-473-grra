@@ -36,6 +36,11 @@ UserSchema.statics = {
   getAllFeeds: function(cb) {
     this.distinct('feeds')
     .exec(cb);
+  },
+
+  validateUserId: function(uid, cb) {
+    this.findOne( { _id: uid }, { _id: 1 } )
+    .exec(cb);
   }
 };
 

@@ -79,14 +79,19 @@ FeedSchema.statics = {
   getFeedsByUserId: function(uid, cb) {
     this.find(
       { uid: uid },
-      { _id: 1 })
+      { tilte: 1 })
     .exec(cb);
   },
 
   getAllFeeds: function(cb) {
     this.find(
       { uid: { $not: { $size: 0 } } },
-      { _id:1 } )
+      { _id: 1 } )
+    .exec(cb);
+  },
+
+  validateFeedId: function(fid, cb) {
+    this.findOne( { _id: fid }, { _id: 1 } )
     .exec(cb);
   }
 
