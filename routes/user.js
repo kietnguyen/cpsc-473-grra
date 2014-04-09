@@ -105,10 +105,6 @@ exports.logout = function(req, res){
   res.redirect("/user/login");
 }
 
-exports.login = function(req, res) {
-  res.send("user.login");
-};
-
 exports.show = function(req, res) {
   res.send("user.show");
 };
