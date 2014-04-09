@@ -4,7 +4,7 @@
 require('../models/feed.js');
 
 var mongoose = require('mongoose'),
-//    _ = require('underscore'),
+    //    _ = require('underscore'),
     _ = require('lodash'),
     FeedParser = require('feedparser'),
     request = require('request'),
@@ -316,6 +316,7 @@ var fetch = function(options, callback) {
           }
         });
       }
+
     });
   }, callback);
 };
@@ -380,7 +381,7 @@ exports.refreshAll = function (req, res) {
         urls:  _.map(urls, function(val) { return val.url; })
       };
       fetch(options, function(err) {
-        if (err) { console.err(err); }
+        if (err) { console.error(err); }
       });
     });
 

@@ -4,14 +4,14 @@
 require('./user.js');
 
 var mongoose = require('mongoose'),
-    autoIncrement = require('mongoose-auto-increment'),
+//    autoIncrement = require('mongoose-auto-increment'),
     env = process.env.NODE_ENV || 'development',
     config = require('../config/config')[env],
     Schema = mongoose.Schema,
     User = mongoose.model('User');
 
-var connection = mongoose.createConnection(config.db);
-autoIncrement.initialize(connection);
+//var connection = mongoose.createConnection(config.db);
+//autoIncrement.initialize(connection);
 
 var FeedSchema = new Schema({
   _id: { type: Number },
@@ -45,19 +45,19 @@ FeedSchema.statics = {
     //console.dir(options);
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
-      { $project: { _id: 0, items: 1 } }, 
-      { $unwind: '$items'}, 
+      { $project: { _id: 0, items: 1 } },
+      { $unwind: '$items'},
       { $sort: { 'items.pubDate': -1 } },
       { $skip: options.perPage * options.page },
       { $limit: options.perPage } )
     .exec(cb);
-  }, 
+  },
 
   // Count number of feed items
   getNumOfItems: function(options, cb) {
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
-      { $project: { _id: 0, items: 1 } }, 
+      { $project: { _id: 0, items: 1 } },
       { $unwind: '$items'},
       { $group: { _id: null, total: { $sum: 1 } } } )
     .exec(cb);
@@ -85,12 +85,12 @@ FeedSchema.statics = {
 
   getAllFeeds: function(cb) {
     this.find(
-      { uid: { $not: { $size: 0 } } }, 
+      { uid: { $not: { $size: 0 } } },
       { _id:1 } )
     .exec(cb);
   }
 
 };
 
-FeedSchema.plugin(autoIncrement.plugin, 'Feed');
+//FeedSchema.plugin(autoIncrement.plugin, 'Feed');
 mongoose.model('Feed', FeedSchema);

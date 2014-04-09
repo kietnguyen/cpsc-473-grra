@@ -2,13 +2,13 @@
 "use strict";
 
 var mongoose = require('mongoose'),
+//    autoIncrement = require('mongoose-auto-increment'),
     env = process.env.NODE_ENV || 'development',
     config = require('../config/config')[env],
-    Schema = mongoose.Schema,
-    autoIncrement = require('mongoose-auto-increment');
+    Schema = mongoose.Schema;
 
-var connection = mongoose.createConnection(config.db);
-autoIncrement.initialize(connection);
+//var connection = mongoose.createConnection(config.db);
+//autoIncrement.initialize(connection);
 
 var UserSchema = new Schema({
   _id: { type: Number },
@@ -39,5 +39,5 @@ UserSchema.statics = {
   }
 };
 
-UserSchema.plugin(autoIncrement.plugin, 'User');
+//UserSchema.plugin(autoIncrement.plugin, 'User');
 mongoose.model('User', UserSchema);
