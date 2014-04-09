@@ -16,6 +16,7 @@
 * [SB Admin 2 - A Free Bootstrap Admin Theme](http://startbootstrap.com/sb-admin-v2)
 * [Font Awesome](http://fortawesome.github.io/Font-Awesome/)
 * [metisMenu](https://github.com/onokumus/metisMenu)
+* [jquery.nicescroll](https://github.com/inuyaksa/jquery.nicescroll)
 
 ## References
 * [HTTP Status Cats API](https://httpcats.herokuapp.com/)

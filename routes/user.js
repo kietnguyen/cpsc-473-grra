@@ -48,7 +48,7 @@ function createUser(req){
 function authenticateUser(req, res){
   var post = req.body;
   var objectId;
-  
+
   if (req.session.uid) {
 res.redirect('/user/'+req.session.uid+'/feeds');  }
 
@@ -59,14 +59,12 @@ res.redirect('/user/'+req.session.uid+'/feeds');  }
     collection.findOne({username: post.username, password: post.password},{_id:1}, function(err, doc) {
       if (err) console.error(err);
 
-
-
       if (doc) {
         console.log("USER: '" + post.username + "' successfully authenticated");
         console.dir(doc);
-        console.log ("uid is : "+doc._id);
+        console.log ("uid is : " + doc._id);
         req.session.uid = doc._id;
-        res.redirect('/user/'+doc._id+'/feeds');
+        res.redirect('/user/' + doc._id + '/feeds');
       }
       else {
         console.log("USER: '" + post.username + "'" + " invalid credentials");
