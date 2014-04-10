@@ -138,25 +138,23 @@ exports.update = function(req, res) {
   if (uid === undefined)
     return res.redirect("/user/login");
 
-  //  var collection = db.collection('users');
-  User.findOne({username: user}, function(err, doc) {
-    if (err) {
-      throw err;
-    }
-    if (!doc) {
-      var document = { username: user, password: pass };
-      User.update(
-        { _id: uid }, document, {safe: true}, function(err, records) {
-          if (err) throw err;
-          console.log("Record updated as " + records);
-          res.redirect('/user/' + uid + '/feeds');
-          //db.close();
-        });
-    } else {
-      console.log("No user found");
-      res.redirect('/user/' + uid + '/edit');
-    }
-  });
+  User.update(
+    { _id: mongoose.Types.ObjectId(uid) },
+    { username: user, password: pass },
+    { safe: true },
+    function(err, records) {
+      if (err) {
+        errorHandler.loadPage(500, err, res);
+      }
+      console.log("Record updated as " + records);
+
+      if (records) {
+        delete req.session.uid;
+        res.redirect("/user/login");
+      } else {
+        res.redirect("/user/" + uid + "/edit");
+      }
+    });
 };
 
 exports.delete = function(req, res) {

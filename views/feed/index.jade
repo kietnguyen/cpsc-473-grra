@@ -2,7 +2,7 @@ extends ../layout
 
 block content
   #wrapper
-    nav.navbar.navbar-default.navbar-fixed-top(role="navigation")
+    nav.navbar.navbar-inverse.navbar-fixed-top(role="navigation")
       .navbar-header
         button.navbar-toggle(type="button", data-toggle="collapse", data-target=".sidebar-collapse")
           span.sr-only Toggle navigation
@@ -17,11 +17,6 @@ block content
             i.fa.fa-user.fa-fw
             i.fa.fa-caret-down
           ul.dropdown-menu.dropdown-messages
-            li
-              a(href="/user/#{uid}/edit")
-                i.fa.fa-gear.fa-fw
-                | &nbsp;Settings
-            li.divider
             li
               a(href="/user/logout")
                 i.fa.fa-sign-out.fa-fw

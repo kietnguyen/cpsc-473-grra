@@ -187,7 +187,7 @@ exports.index = function(req, res) {
 
     //console.dir(userFeeds);
     var feedIds = _.map(userFeeds, function(val) { return val._id; });
-    console.dir(feedIds);
+    //console.dir(feedIds);
     var options = {
       uid: uid,
       page: page,
@@ -213,7 +213,7 @@ exports.index = function(req, res) {
         console.error(err);
         return errorHandler.loadPage(500, err, res);
       }
-      console.dir(feedItems);
+      //console.dir(feedItems);
       options.feedItems = _.map(feedItems, function(val) { return val.items; });
 
       // Get total number of feed items
