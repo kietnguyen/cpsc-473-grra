@@ -67,8 +67,10 @@ app.get('/', routes.index);
 
 // user route
 app.get("/user/login", user.showLogin);
+app.get("/user/login/:status", user.showLogin);
 app.post("/user/login", user.login);
 app.get("/user/signup", user.new);
+app.get("/user/signup/:status", user.new);
 app.post("/user/signup", user.create);
 app.get("/user/logout", user.isAuthenticated, user.logout);
 app.get('/user', user.isAuthenticated, user.show); //preliminary test for navigating to authenticated pages

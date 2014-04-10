@@ -9,6 +9,9 @@ html
     link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js")
     script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
+    script(src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js")
+    link(rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css")
+    script(src="/js/errors.js")
     link(rel="stylesheet", href="/css/cover.css")
 
   body
@@ -23,6 +26,8 @@ html
                   li(class="active")
                     a(href="/user/login") Login
                   li
+                    a(href="/user/signup") Sign up
+                  li
                     a(href="#") About
 
             div(class="inner cover")
@@ -33,15 +38,20 @@ html
                       div(class="panel-heading") Login
                       div(class="panel-body", style="padding:30px")
                         div(class="form-group")
-                          input(type="text", class="form-control", name="username", placeholder="Username")
+                          input(id="tb_username", type="text", class="form-control", name="username", required, placeholder="Username")
                         div(class="form-group")
-                          input(type="password", class="form-control", name="password", placeholder="Password")
+                          input(id="tb_password", type="password", class="form-control", name="password", required, placeholder="Password")
                         div
-                          input(type="submit", class="btn btn-primary", value="Login")
+                          input(type="submit", class="btn btn-primary btn-lg", value="Login")
             div(class="mastfoot")
               div(class="inner")
                 p © 2014 Edify
-                  
+
+      div(id="signupSuccess" title="Welcome to Edify!")
+        div(class="modal-body")
+          p You have successfully registered. Please login to start adding and enjoying your news feeds!
+          div(style="padding-top:15px;")
+            a(href="#" id="btn_close2" class="btn btn-primary btn-lg" style="color:white") Ok
 
       
       

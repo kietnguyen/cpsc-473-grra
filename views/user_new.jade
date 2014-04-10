@@ -9,6 +9,9 @@ html
     link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js")
     script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
+    script(src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js")
+    link(rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css")
+    script(src="/js/errors.js")
     link(rel="stylesheet", href="/css/cover.css")
 
   body
@@ -22,6 +25,8 @@ html
                 ul(class="nav masthead-nav")
                   li
                     a(href="/user/login") Login
+                  li(class="active")
+                    a(href="/user/signup") Sign up
                   li
                     a(href="#") About
 
@@ -33,15 +38,21 @@ html
                       div(class="panel-heading") Sign up
                       div(class="panel-body", style="padding:30px")
                         div(class="form-group")
-                          input(type="text", class="form-control", name="username", placeholder="Desired Username")
+                          input(type="text", class="form-control", name="username", required, placeholder="Desired Username")
                         div(class="form-group")
-                          input(type="password", class="form-control", name="password", placeholder="Desired Password")
+                          input(type="password", class="form-control", name="password", required, placeholder="Desired Password")
                         div
-                          input(type="submit", class="btn btn-primary", value="Signup")
+                          input(type="submit", class="btn btn-primary btn-lg", value="Signup")
             div(class="mastfoot")
               div(class="inner")
                 p © 2014 Edify
 
+    div(id="signupErr" title="Signup Error")
+      div(class="modal-body")
+        p The username you are attempting to signup with already exists. Please try again under a different username.
+        div(style="padding-top:15px;")
+          a(href="#" id="btn_close" class="btn btn-primary btn-lg" style="color:white") Try Again
+                
       
 
 
