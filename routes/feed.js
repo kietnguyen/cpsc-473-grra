@@ -25,7 +25,7 @@ var feedIndex = function (err, res, options) {
   //console.dir(feedItems);
   return res.render('./feed/index', {
     title: 'Edify | Feeds',
-    feedItems: feedItems,
+    feedItems: options.feedItems,
     uid: options.uid,
     fid: options.fid,
     feedTitles: options.feedTitles,
@@ -213,7 +213,7 @@ exports.index = function(req, res) {
         console.error(err);
         return errorHandler.loadPage(500, err, res);
       }
-
+      console.dir(feedItems);
       options.feedItems = _.map(feedItems, function(val) { return val.items; });
 
       // Get total number of feed items
