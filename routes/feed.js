@@ -232,21 +232,24 @@ exports.index = function(req, res) {
 };
 
 exports.edit = function(req, res) {
-  var uid = req.params.uid,
+  var uid = req.session.uid,
       fid = req.params.fid;
 
+  if (uid === undefined)
+    return res.redirect("/user/login");
 
   res.render('feed/edit',{
-    title: req.params.title,
-    url : req.params.url,
     uid: uid,
     fid: fid
   });
 };
 
 exports.update = function(req, res) {
-  var uid = req.params.uid,
+  var uid = req.session.uid,
       fid = req.params.fid;
+
+  if (uid === undefined)
+    return res.redirect("/user/login");
 
   var title = req.body.title;
   Feed.update({ _id: fid }, {$set: { title: title}}, function(err){

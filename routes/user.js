@@ -51,7 +51,7 @@ function authenticateUser(req, res){
   var objectId;
 
   if (req.session.uid) {
-    res.redirect('/user/'+req.session.uid+'/feeds');  
+    res.redirect('/user/'+req.session.uid+'/feeds');
   }
 
   mongo.connect("mongodb://localhost:27017/grra_dev", function(err, db){
@@ -59,20 +59,20 @@ function authenticateUser(req, res){
 
     var collection = db.collection("users");
     collection.findOne({username: post.username, password: post.password},{_id:1}, function(err, doc) {
-        if (err) console.error(err);
+      if (err) console.error(err);
 
-        if (doc) {
-          console.log("USER: '" + post.username + "' successfully authenticated");
-          console.dir(doc);
-          console.log ("uid is : "+doc._id);
-          req.session.uid = doc._id;
-          res.redirect('/user/'+doc._id+'/feeds');
-        }
-        else {
-          console.log("USER: '" + post.username + "'" + " invalid credentials");
-          res.redirect("/user/login/error");
-        }
-  	});
+      if (doc) {
+        console.log("USER: '" + post.username + "' successfully authenticated");
+        console.dir(doc);
+        console.log ("uid is : "+doc._id);
+        req.session.uid = doc._id;
+        res.redirect('/user/'+doc._id+'/feeds');
+      }
+      else {
+        console.log("USER: '" + post.username + "'" + " invalid credentials");
+        res.redirect("/user/login/error");
+      }
+    });
   });
 }
 
@@ -120,23 +120,31 @@ exports.show = function(req, res) {
 };
 
 exports.getupdate = function(req, res) {
+  var uid = req.session.uid;
+
+  if (uid === undefined)
+    return res.redirect("/user/login");
+
   res.render("user/update",
              { title: "GRRA | Update Account",
               uid: req.params.uid });
 };
 
 exports.update = function(req, res) {
-  var uid = req.params.uid,
+  var uid = req.session.uid,
       user=req.body.user,
       pass =req.body.pass;
 
+  if (uid === undefined)
+    return res.redirect("/user/login");
+
   //  var collection = db.collection('users');
-  User.findOne({user: user}, function(err, doc) {
+  User.findOne({username: user}, function(err, doc) {
     if (err) {
       throw err;
     }
     if (!doc) {
-      var document = { "user": user, "pass": pass };
+      var document = { username: user, password: pass };
       User.update(
         { _id: uid }, document, {safe: true}, function(err, records) {
           if (err) throw err;
@@ -144,6 +152,9 @@ exports.update = function(req, res) {
           res.redirect('/user/' + uid + '/feeds');
           //db.close();
         });
+    } else {
+      console.log("No user found");
+      res.redirect('/user/' + uid + '/edit');
     }
   });
 };
