@@ -4,8 +4,7 @@
 var express = require('express'),
     http = require('http'),
     path = require('path'),
-    helpers = require('view-helpers'),
-    schedule = require('node-schedule');
+    helpers = require('view-helpers');
 
 var routes = require('./routes'),
     user = require('./routes/user'),
@@ -35,10 +34,13 @@ mongoose.connection.on('disconnected', function () {
 var app = express();
 app.locals.moment = require('moment');
 
-schedule.scheduleJob({minute:15}, function() {
+var intervalMinutes = 15 * 60 * 1000;
+setInterval(function(err) {
+  if (err) { console.error(err); }
+
   console.log("Refresh all ... ");
   feed.refreshAll();
-});
+}, intervalMinutes);
 
 // all environments
 app.set('port', process.env.PORT || 8080);

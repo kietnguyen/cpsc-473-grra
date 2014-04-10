@@ -165,7 +165,7 @@ exports.create = function(req, res) {
   feedparser.on("end", function(err) {
     if (err) console.error(err);
 
-    var redirectUrl = "/user/" + uid + "/feeds/";
+    var redirectUrl = "/user/" + uid + "/feeds/refresh";
     redirect(redirectUrl, res);
   });
 };
