@@ -1,44 +1,84 @@
 extends ../layout
 
 block content
-  - if (feedItems.length)
-    - if (isNaN(fid))
-      a(href='/user/#{uid}/feeds/refresh') REFRESH
-    - else
-      // For single feed
-      // Feed title
-      h1 
-      // Feed controller
-      a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH&nbsp;&nbsp;&nbsp;
-      a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
-      form(method='POST', action='/user/#{uid}/feeds/#{fid}')
-        input(type='hidden', name='_method', value='DELETE')
-        button.btn.btn-primary(type='submit') Unsubscribe
-    - each item in feedItems
-      .panel.panel-default
-          .panel-heading  
-            .feed
-              h3
-                a(href='#{item.url}') #{item.title}
-          .panel-body
-          
+  #wrapper
+    nav.navbar.navbar-default.navbar-fixed-top(role="navigation")
+      .navbar-header
+        button.navbar-toggle(type="button", data-toggle="collapse", data-target=".sidebar-collapse")
+          span.sr-only Toggle navigation
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.navbar-brand(href="/") Torpid Futurism
+
+      ul.nav.navbar-top-links.navbar-right
+        li.dropdown
+          a.dropdown-toggle(href="#", data-toggle="dropdown")
+            i.fa.fa-user.fa-fw
+            i.fa.fa-caret-down
+          ul.dropdown-menu.dropdown-messages
+            li
+              a(href="/user/#{uid}/edit")
+                i.fa.fa-gear.fa-fw
+                | &nbsp;Settings
+            li.divider
+            li
+              a(href="/user/logout")
+                i.fa.fa-sign-out.fa-fw
+                | &nbsp;Logout
+
+      .navbar-default.navbar-static-side(role="navigation")
+        .sidebar-collapse
+          ul.nav#side-menu
+            li
+              a(href="/user/#{uid}/feeds/new")
+                i.fa.fa-plus.fa-fw
+                | &nbsp;Add a subscription
+            li
+              a(href="/user/#{uid}/feeds")
+                i.fa.fa-list.fa-fw
+                | &nbsp;All items
+            - each feedTitle in feedTitles
+              li
+                a(href="/user/#{uid}/feeds/#{feedTitle._id}") #{feedTitle.title}
+
+    #page-wrapper
+      .row
+      - if (feedItems.length)
+        - if (fid === undefined)
+          a(href='/user/#{uid}/feeds/refresh') REFRESH
+        - else
+          // For single feed
+          // Feed title
+          h2= feedTitles[0].title
+          // Feed controller
+          form(method='POST', action='/user/#{uid}/feeds/#{fid}')
+            input(type='hidden', name='_method', value='DELETE')
+            button.btn.btn-primary(type='submit') Unsubscribe
+          a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH
+          | &nbsp;&nbsp;&nbsp;
+          //a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
+        - each item in feedItems
+          .feed
+            h3
+              a(href='#{item.url}') #{item.title}
             .desciption
               !{item.description}
-            
+
             .meta
-              span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')} 
+              span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')}
               - if (item.author)
                 | &nbsp; | &nbsp;
                 span Author: #{item.author}
-      
 
-      
-            
-        
-    - if (pages > 1)
-      ul.pagination
-        != createPagination(pages, page)
-  - else
-    - if (pages === 0)
-      h4 No feed.&nbsp;
-        a(href='/user/#{uid}/feeds/new') Create one.
+
+        - if (pages > 1)
+          ul.pagination
+            != createPagination(pages, page)
+      - else
+        - if (pages === 0)
+          h4 No feed.&nbsp;
+            a(href='/user/#{uid}/feeds/new') Create one.
+
+  script.
+    $('.sidebar-collapse').niceScroll("#side-menu")

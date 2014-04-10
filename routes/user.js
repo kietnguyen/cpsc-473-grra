@@ -49,7 +49,7 @@ function createUser(req){
 function authenticateUser(req, res){
   var post = req.body;
   var objectId;
-  
+
   if (req.session.uid) {
     res.redirect('/user/'+req.session.uid+'/feeds');  
   }

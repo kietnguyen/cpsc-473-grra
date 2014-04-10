@@ -4,23 +4,25 @@
 require('./user.js');
 
 var mongoose = require('mongoose'),
-    autoIncrement = require('mongoose-auto-increment'),
+    _ = require("lodash"),
     env = process.env.NODE_ENV || 'development',
     config = require('../config/config')[env],
     Schema = mongoose.Schema,
     User = mongoose.model('User');
 
 var connection = mongoose.createConnection(config.db);
-autoIncrement.initialize(connection);
 
 var FeedSchema = new Schema({
-  _id: { type: Number },
-  uid: [{ type: Number }],
+  uid: [{ type: Schema.Types.ObjectId, ref: "User" }],
   title: { type: String, trim: true },
   url:  { type: String, trim: true },
   description: { type: String, trim: true },
-  uids: { type: Number, ref: 'User' },
   lastUpdate: { type: Date },
+  userOptions: [{
+    uid: { type: Schema.Types.ObjectId, ref: "User" },
+    dateAdded: { type: Date, default: Date.now },
+    title: { type: String }
+  }],
   items: [{
     title: { type: String, trim: true },
     url: { type: String, trim: true },
@@ -33,7 +35,6 @@ var FeedSchema = new Schema({
 // Feed validation
 FeedSchema.path('title').required(true, 'Feed title cannot be blank');
 FeedSchema.path('url').required(true, 'Feed URL cannot be blank');
-FeedSchema.path('description').required(true, 'Feed description cannot be blank');
 
 FeedSchema.methods = {
 
@@ -79,7 +80,7 @@ FeedSchema.statics = {
   getFeedsByUserId: function(uid, cb) {
     this.find(
       { uid: uid },
-      { tilte: 1 })
+      { title: 1 })
     .exec(cb);
   },
 
@@ -90,6 +91,10 @@ FeedSchema.statics = {
     .exec(cb);
   },
 
+  addItems: function(items, cb) {
+    // wip
+  },
+
   validateFeedId: function(fid, cb) {
     this.findOne( { _id: fid }, { _id: 1 } )
     .exec(cb);
@@ -97,5 +102,4 @@ FeedSchema.statics = {
 
 };
 
-FeedSchema.plugin(autoIncrement.plugin, 'Feed');
 mongoose.model('Feed', FeedSchema);

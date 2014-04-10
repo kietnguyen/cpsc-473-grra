@@ -4,7 +4,6 @@
 require('../models/feed.js');
 
 var mongoose = require('mongoose'),
-    //    _ = require('underscore'),
     _ = require('lodash'),
     FeedParser = require('feedparser'),
     request = require('request'),
@@ -20,7 +19,7 @@ function redirect(location, res) {
   res.redirect(303, location);
 }
 
-var feedIndex = function (err, res, feedItems, options) {
+var feedIndex = function (err, res, options) {
   if (err) { return errorHandler.loadPage(500, err, res); }
 
   //console.dir(feedItems);
@@ -29,18 +28,17 @@ var feedIndex = function (err, res, feedItems, options) {
     feedItems: feedItems,
     uid: options.uid,
     fid: options.fid,
-    feedTitle: "",
+    feedTitles: options.feedTitles,
     page: options.page + 1,
     pages: Math.ceil(options.totalItems / options.perPage)
   });
 };
 
 exports.new = function(req, res) {
-  var uid = parseInt(req.params.uid);
+  var uid = req.session.uid;
 
-  if (isNaN(uid)) {
-    return errorHandler(404, new Error('uid is NaN'), res);
-  }
+  if (uid === undefined)
+    return res.redirect("/user/login");
 
   res.render('feed/new', {
     title: 'Edify | Create a new feed',
@@ -48,15 +46,19 @@ exports.new = function(req, res) {
   });
 };
 
-exports.create = function(req, res) {
-  //use example: http://leoville.tv/podcasts/sn.xml
 
-  var uid = req.params.uid;
+exports.create = function(req, res) {
+  // example1: http://leoville.tv/podcasts/sn.xml
+  // example2: http://www.theverge.com/rss/group/tech/index.xml
+
+  var uid = req.session.uid;
+  if (uid === undefined)
+    return res.redirect("/user/login");
 
   var flag = true;
 
-  var req = request(req.body.url)
-  , feedparser = new FeedParser();
+  req = request(req.body.url);
+  var feedparser = new FeedParser();
 
   req.on('error', function (error) {
     return errorHandler.loadPage(404, new Error('Error reading request'), res);
@@ -75,18 +77,18 @@ exports.create = function(req, res) {
   });
 
   feedparser.on('readable', function() {
-    var stream = this
-    , meta = this.meta
-    , item;
+    var stream = this,
+        meta = this.meta,
+        item;
 
     var theArray = [];
     var theItem = {
-		title: "",
-		url: "",
-		description: "",
-		pubDate: "",
-		author: ""
-	};
+      title: "",
+      url: "",
+      description: "",
+      pubDate: "",
+      author: ""
+    };
     var updateFlag = true;
 
     while (item = stream.read()) {
@@ -105,7 +107,7 @@ exports.create = function(req, res) {
     if(flag === true) {
       Feed.find({'title': meta.title}, function(err, theResult) {
         if(theResult.length) {
-          Feed.find({'title': meta.title, 'uid': {$in: [uid]} }, function (err1, theResult1) {
+          Feed.find({'title': meta.title, 'uid': uid }, function (err1, theResult1) {
             if(theResult1.length) {
               // uid is already stored
             }
@@ -119,22 +121,24 @@ exports.create = function(req, res) {
         }
         else {
           // create new feed entry
+          var feedUrl = meta.xmlurl;
+          if (!feedUrl) { feedUrl = meta["atom:id"]["#"]; }
           var newFeed = new Feed({
-            uid: uid,
+            uid: [ uid ],
             title: meta.title,
-            url:  meta.xmlurl,
+            url:  feedUrl,
             description: meta.description,
           });
 
           // save the feed entry
           newFeed.save( function(error, data){
             if(error){
-				console.log(error);
+              console.log(error);
               return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
             }
             else{
             }
-          })
+          });
         }
       });
 
@@ -158,44 +162,49 @@ exports.create = function(req, res) {
     });
   });
 
+  feedparser.on("end", function(err) {
+    if (err) console.error(err);
 
-  var redirectUrl = "/user/" + uid + "/feeds/";
-  redirect(redirectUrl, res);
+    var redirectUrl = "/user/" + uid + "/feeds/";
+    redirect(redirectUrl, res);
+  });
 };
 
 // show a feed or all feeds of a user
 exports.index = function(req, res) {
-  var uid = parseInt(req.params.uid),
-      fid = parseInt(req.params.fid),
+  var fid = req.params.fid,
+      uid = req.session.uid,
       page = (req.param('page') > 0 ? req.param('page') : 1) - 1,
       perPage = 4;
 
-  if (isNaN(uid) || (req.params.fid !== undefined && isNaN(fid))) {
-    return errorHandler.loadPage(404, new Error('uid or fid is NaN'), res);
-  }
+  if (uid === undefined)
+    return res.redirect("/user/login");
 
   Feed.getFeedsByUserId(uid, function (err, userFeeds) {
     if (err) {
       return errorHandler.loadPage(500, err, res);
     }
 
-    userFeeds = _.map(userFeeds, function(val) { return val._id; });
     //console.dir(userFeeds);
+    var feedIds = _.map(userFeeds, function(val) { return val._id; });
+    console.dir(feedIds);
     var options = {
       uid: uid,
       page: page,
-      perPage: perPage
+      perPage: perPage,
+      feedTitles: userFeeds
     };
 
-    if (req.params.fid === undefined) {
+    if (fid === undefined) {
       // show all feeds
-      options.feeds = userFeeds;
+      options.feeds = feedIds;
     } else {
       // show specific feed
-      if (!_.contains(userFeeds, fid)) {
-        return errorHandler.loadPage(404, new Error('userFeeds does not contain fid'), res);
+      feedIds = _.map(feedIds, function(val) { return val.toString(); });
+      if (!_.contains(feedIds, fid)) {
+        return errorHandler.loadPage(404, new Error('feedIds does not contain ' + fid), res);
       }
-      options.feeds = [fid];
+      options.feeds = [ mongoose.Types.ObjectId(fid) ];
       options.fid = fid;
     }
 
@@ -205,7 +214,9 @@ exports.index = function(req, res) {
         return errorHandler.loadPage(500, err, res);
       }
 
-      feedItems = _.map(feedItems, function(val) { return val.items; });
+      options.feedItems = _.map(feedItems, function(val) { return val.items; });
+
+      // Get total number of feed items
       Feed.getNumOfItems(options, function(err, total) {
         if (err) {
           console.error(err);
@@ -213,7 +224,7 @@ exports.index = function(req, res) {
         }
 
         options.totalItems = (total.length === 0 ? 0 : total[0].total);
-        feedIndex(err, res, feedItems, options);
+        feedIndex(err, res, options);
       });
     });
 
@@ -221,8 +232,8 @@ exports.index = function(req, res) {
 };
 
 exports.edit = function(req, res) {
-  var uid = parseInt(req.params.uid),
-      fid = parseInt(req.params.fid);
+  var uid = req.params.uid,
+      fid = req.params.fid;
 
 
   res.render('feed/edit',{
@@ -234,8 +245,8 @@ exports.edit = function(req, res) {
 };
 
 exports.update = function(req, res) {
-  var uid = parseInt(req.params.uid),
-      fid = parseInt(req.params.fid);
+  var uid = req.params.uid,
+      fid = req.params.fid;
 
   var title = req.body.title;
   Feed.update({ _id: fid }, {$set: { title: title}}, function(err){
@@ -245,8 +256,8 @@ exports.update = function(req, res) {
 };
 
 exports.delete = function(req, res) {
-  var uid = parseInt(req.params.uid),
-      fid = parseInt(req.params.fid);
+  var uid = req.params.uid,
+      fid = req.params.fid;
 
   // removes uid from the feed it's associated with
   Feed.update(
@@ -254,7 +265,7 @@ exports.delete = function(req, res) {
     { $pull: { "uid" : uid } },
     function(err) {}
   );
-  
+
   var redirectUrl = "/user/" + uid + "/feeds/";
   redirect(redirectUrl, res);
 
@@ -323,18 +334,16 @@ var fetch = function(options, callback) {
           }
         });
       }
-
     });
   }, callback);
 };
 
 exports.refresh = function (req, res) {
-  var uid = parseInt(req.params.uid),
-      fid = parseInt(req.params.fid);
+  var uid = req.session.uid,
+      fid = req.params.fid;
 
-  if (isNaN(uid) || (req.params.fid !== undefined && isNaN(fid))) {
-    return errorHandler.loadPage(404, new Error('uid or fid is NaN'), res);
-  }
+  if (uid === undefined)
+    return res.redirect("/user/login");
 
   Feed.getFeedsByUserId(uid, function(err, userFeeds) {
     if (err) {
@@ -343,15 +352,16 @@ exports.refresh = function (req, res) {
 
     var feedIds;
     userFeeds = _.map(userFeeds, function(val) { return val._id; });
-    if (req.params.fid === undefined) {
+    if (fid === undefined) {
       // all feeds
       feedIds = userFeeds;
     } else {
       // one feed
+      userFeeds = _.map(userFeeds, function(val) { return val.toString(); });
       if (!_.contains(userFeeds, fid)) {
-        return errorHandler(404, new Error('userFeeds does not contain fid'), res);
+        return errorHandler.loadPage(404, new Error('userFeeds does not contain fid'), res);
       }
-      feedIds = [fid];
+      feedIds = [ mongoose.Types.ObjectId(fid) ];
     }
 
     Feed.getFeedUrls(feedIds, function(err, urls) {

@@ -11,10 +11,8 @@ var mongoose = require('mongoose'),
 //autoIncrement.initialize(connection);
 
 var UserSchema = new Schema({
-  _id: { type: Number },
   user: { type: String, trim: true },
-  pass:  { type: String, trim: true },
-  feeds: [{ type: Number, ref: 'Feed' }]
+  pass:  { type: String, trim: true }
 });
 
 // User validation
