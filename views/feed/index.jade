@@ -10,7 +10,9 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href="/user/#{uid}/feeds") Edify
+        a.navbar-brand(href="/user/#{uid}/feeds")
+          img(src="/images/newspaper-feed-256x256.png")
+          span.logo-letter Edify
 
       ul.nav.navbar-top-links.navbar-right
         li.dropdown
@@ -30,7 +32,7 @@ block content
 
       // Sidebar
       .navbar-default.navbar-static-side(role="navigation")
-        .sidebar-collapse
+        .sidebar-collapse.sidebar-custom
           ul.nav#side-menu
             li
               a.feeds-new(href="/user/#{uid}/feeds/new")
@@ -55,8 +57,8 @@ block content
               | All items
             span.feed-controller
               a.btn.btn-default(href='/user/#{uid}/feeds/refresh')
-                i.fa.fa-refresh.fa-2
-                | &nbsp; REFRESH
+                i.glyphicon.glyphicon-refresh
+                span.a-refresh &nbsp; REFRESH
 
           - else
             // For single feed
@@ -66,9 +68,9 @@ block content
 
             // Feed controller
             span.feed-controller
-              button.btn.btn-default(href='/user/#{uid}/feeds/refresh')
+              a.btn.btn-default(href='/user/#{uid}/feeds/#{fid}/refresh')
                 i.glyphicon.glyphicon-refresh
-                | &nbsp; REFRESH
+                span.a-refresh &nbsp; REFRESH
               form(method='POST', action='/user/#{uid}/feeds/#{fid}')
                 input(type='hidden', name='_method', value='DELETE')
                 button.btn.btn-default(type='submit')
@@ -78,18 +80,18 @@ block content
 
         // Feed items
         - each item in feedItems
-          .feed
-            h3
-              a(href='#{item.url}') #{item.title}
+          .well
+            .page-header
+              h4: a(href='#{item.url}', target="_blank") #{item.title}
+              .meta-date
+                span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')}
+              - if (item.author)
+                .meta-author
+                  span by&nbsp;
+                    strong #{item.author}
+
             .desciption
               !{item.description}
-
-            .meta
-              span #{moment(item.pubDate).format('MMMM Do YYYY, h:mm:ss a')}
-              - if (item.author)
-                | &nbsp; | &nbsp;
-                span Author: #{item.author}
-
 
         - if (pages > 1)
           .text-center

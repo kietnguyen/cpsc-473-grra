@@ -1,15 +1,12 @@
 html, body, #wrapper, #page-wrapper {
   height: 100%;
 }
-nav.navbar.navbar-default.navbar-fixed-top {
-  margin-bottom: 0;
-}
-.sidebar-collapse {
-  position: fixed;
-  top: 51px;
+.sidebar-custom {
   bottom: 0;
   width: inherit;
   border-right: 1px solid #e7e7e7;
+  position: fixed;
+  top: 51px;
 }
 .feed-header {
   font-size: 24px;
@@ -19,12 +16,16 @@ nav.navbar.navbar-default.navbar-fixed-top {
   position: relative;
   top: -5px;
 }
-.feed-controller a, .feed-controller button {
+.feed-controller button, .feed-controller a {
   font-size: 12px;
   width: 126px;
   height: 32px;
   margin-right: 4px;
   padding: 6px;
+}
+.feed-controller .a-refresh {
+  position: relative;
+  top: -1px;
 }
 .feed-controller .glyphicon {
   font-size: 1.2em;
@@ -33,4 +34,47 @@ nav.navbar.navbar-default.navbar-fixed-top {
 }
 .feed-controller form {
   display: inline;
+}
+a.navbar-brand {
+  padding-top: 0;
+  position: relative;
+  top: -3px;
+}
+a.navbar-brand img {
+  height: 56px;
+}
+a.navbar-brand .logo-letter {
+  position: relative;
+  top: 9px;
+  font-family: 'Special Elite', cursive;
+  font-weight: 400;
+  font-size: 32px;
+  margin-left: 10px;
+}
+ul.dropdown-menu.dropdown-messages {
+  width: 160px;
+}
+.well {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  background-color: #fbfbfb;
+}
+.well .page-header {
+  margin-top: 0;
+}
+.well .page-header h4 {
+  margin-bottom: 16px;
+}
+.meta-date, .meta-author {
+  position: relative;
+  top: -12px;
+  font-size: smaller;
+}
+.meta-date span {
+  float: right;
+}
+.meta-author span {
+  padding-left: 6px;
+  float: left
 }
