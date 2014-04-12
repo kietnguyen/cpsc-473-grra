@@ -11,3 +11,26 @@ nav.navbar.navbar-default.navbar-fixed-top {
   width: inherit;
   border-right: 1px solid #e7e7e7;
 }
+.feed-header {
+  font-size: 24px;
+  margin-right: 20px;
+}
+.feed-controller {
+  position: relative;
+  top: -5px;
+}
+.feed-controller a, .feed-controller button {
+  font-size: 12px;
+  width: 126px;
+  height: 32px;
+  margin-right: 4px;
+  padding: 6px;
+}
+.feed-controller .glyphicon {
+  font-size: 1.2em;
+  position: relative;
+  top: 3px;
+}
+.feed-controller form {
+  display: inline;
+}

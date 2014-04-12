@@ -1,21 +1,24 @@
-extends ../layout
-
-block content
+.col-md-offset-3.col-md-6
   .panel.panel-default
-    .panel-heading  
-      h3 Edit the username and password
-      br
-    .panel-body
-      form.form-horizontal(method='POST', action='/user/#{uid}/update', role='form')
+    .panel-heading
+      .panel-title
+        i.fa.fa-edit.fa-fw
+        | &nbsp; Edit account
+    .panel-body(style="padding:30px")
+      form(method="POST", action="/user/update")
         .form-group
-          label.col-sm-2.control-label(for='inputEmail3') New user name :
-          .col-sm-10
-            input#inputEmail3.form-control(type='text', name='user', placeholder='Enter your new username')
+          .input-group
+            .input-group-addon: i.fa.fa-user.fa-fw
+            input.form-control(type="text", name="user", required, placeholder="Enter your new username")
         .form-group
-          label.col-sm-2.control-label(for='inputPassword3') New password
-          .col-sm-10
-            input#inputPassword3.form-control(type='password', name='pass', placeholder='Enter the new Password')
-        .form-group
-            div(class="col-md-offset-3 col-md-5")
-              button.btn.btn-primary.btn-lg.btn-block(type='submit') SAVE 
+          .input-group
+            .input-group-addon: i.fa.fa-lock.fa-fw
+            input.form-control(type="password", name="pass", required, placeholder="Enter the new Password")
+        .text-center
+          input.btn.btn-primary(type="submit", value="Save", style="margin-right: 12px; width: 69px;")
+          a.btn.btn-default.cancel-btn(href="#") Cancel
 
+script.
+  $("a.cancel-btn").click(function() {
+    window.location.reload(true);
+  });

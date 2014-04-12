@@ -11,13 +11,13 @@ var mongoose = require('mongoose'),
 //autoIncrement.initialize(connection);
 
 var UserSchema = new Schema({
-  user: { type: String, trim: true },
-  pass:  { type: String, trim: true }
+  username: { type: String, trim: true },
+  password:  { type: String, trim: true }
 });
 
 // User validation
-UserSchema.path('user').required(true, 'Username cannot be blank');
-UserSchema.path('pass').required(true, 'Password cannot be blank');
+UserSchema.path('username').required(true, 'Username cannot be blank');
+UserSchema.path('password').required(true, 'Password cannot be blank');
 
 UserSchema.methods = {
 

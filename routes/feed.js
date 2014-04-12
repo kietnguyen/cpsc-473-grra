@@ -121,8 +121,16 @@ exports.create = function(req, res) {
         }
         else {
           // create new feed entry
-          var feedUrl = meta.xmlurl;
-          if (!feedUrl) { feedUrl = meta["atom:id"]["#"]; }
+          console.dir(meta);
+          var feedUrl = (meta.xmlurl || meta.xmlUrl);
+          if (!feedUrl) {
+            try {
+              feedUrl = meta["atom:id"]["#"];
+            } catch (e) {
+              console.error(e);
+              res.redirect("/user/" + uid + "/feeds/new");
+            }
+          }
           var newFeed = new Feed({
             uid: [ uid ],
             title: meta.title,
@@ -164,7 +172,7 @@ exports.create = function(req, res) {
 
   feedparser.on("end", function(err) {
     if (err) console.error(err);
-
+    console.log("hello");
     var redirectUrl = "/user/" + uid + "/feeds/refresh";
     redirect(redirectUrl, res);
   });
@@ -259,20 +267,24 @@ exports.update = function(req, res) {
 };
 
 exports.delete = function(req, res) {
-  var uid = req.params.uid,
+  var uid = req.session.uid,
       fid = req.params.fid;
+
+  if (uid === undefined)
+    return res.redirect("/user/login");
 
   // removes uid from the feed it's associated with
   Feed.update(
     {'_id': fid, 'uid': uid },
     { $pull: { "uid" : uid } },
-    function(err) {}
+    function(err, doc) {
+      if (err) { console.error(err); }
+
+      console.dir(doc);
+      var redirectUrl = "/user/" + uid + "/feeds/";
+      redirect(redirectUrl, res);
+    }
   );
-
-  var redirectUrl = "/user/" + uid + "/feeds/";
-  redirect(redirectUrl, res);
-
-
 };
 
 var fetch = function(options, callback) {
@@ -316,7 +328,7 @@ var fetch = function(options, callback) {
       while (item = stream.read()) {
         var newItem = {
           title: item.title,
-          url: item.link,
+          url: (item.origlink || item.link),
           description: item.description,
           pubDate: item.pubdate,
           author: item.author

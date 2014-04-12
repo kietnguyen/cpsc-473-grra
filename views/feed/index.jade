@@ -3,6 +3,7 @@ extends ../layout
 block content
   #wrapper
     nav.navbar.navbar-inverse.navbar-fixed-top(role="navigation")
+      // Header
       .navbar-header
         button.navbar-toggle(type="button", data-toggle="collapse", data-target=".sidebar-collapse")
           span.sr-only Toggle navigation
@@ -18,15 +19,21 @@ block content
             i.fa.fa-caret-down
           ul.dropdown-menu.dropdown-messages
             li
+              a.user-edit(href="/user/edit")
+                i.fa.fa-gear.fa-fw
+                | &nbsp;Settings
+            li.divider
+            li
               a(href="/user/logout")
                 i.fa.fa-sign-out.fa-fw
                 | &nbsp;Logout
 
+      // Sidebar
       .navbar-default.navbar-static-side(role="navigation")
         .sidebar-collapse
           ul.nav#side-menu
             li
-              a(href="/user/#{uid}/feeds/new")
+              a.feeds-new(href="/user/#{uid}/feeds/new")
                 i.fa.fa-plus.fa-fw
                 | &nbsp;Add a subscription
             li
@@ -38,21 +45,38 @@ block content
                 a(href="/user/#{uid}/feeds/#{feedTitle._id}") #{feedTitle.title}
 
     #page-wrapper
-      .row
       - if (feedItems.length)
-        - if (fid === undefined)
-          a(href='/user/#{uid}/feeds/refresh') REFRESH
-        - else
-          // For single feed
-          // Feed title
-          h2= feedTitles[0].title
-          // Feed controller
-          form(method='POST', action='/user/#{uid}/feeds/#{fid}')
-            input(type='hidden', name='_method', value='DELETE')
-            button.btn.btn-primary(type='submit') Unsubscribe
-          a(href='/user/#{uid}/feeds/#{fid}/refresh') REFRESH
-          | &nbsp;&nbsp;&nbsp;
-          //a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
+        // Feed header
+        .page-header
+          - if (fid === undefined)
+            // All feeds
+            - var fidUrl = ""
+            span.feed-header
+              | All items
+            span.feed-controller
+              a.btn.btn-default(href='/user/#{uid}/feeds/refresh')
+                i.fa.fa-refresh.fa-2
+                | &nbsp; REFRESH
+
+          - else
+            // For single feed
+            - var fidUrl = "#{fid}/"
+            span.feed-header
+              | #{feedTitles[0].title}
+
+            // Feed controller
+            span.feed-controller
+              button.btn.btn-default(href='/user/#{uid}/feeds/refresh')
+                i.glyphicon.glyphicon-refresh
+                | &nbsp; REFRESH
+              form(method='POST', action='/user/#{uid}/feeds/#{fid}')
+                input(type='hidden', name='_method', value='DELETE')
+                button.btn.btn-default(type='submit')
+                  i.glyphicon.glyphicon-remove
+                  | &nbsp; UNSUBSCRIBE
+              //a(href='/user/#{uid}/feeds/#{fid}/edit') EDIT
+
+        // Feed items
         - each item in feedItems
           .feed
             h3
@@ -68,12 +92,33 @@ block content
 
 
         - if (pages > 1)
-          ul.pagination
-            != createPagination(pages, page)
+          .text-center
+            ul.pagination.pagination-large
+              include ../pagination
+
+
+
       - else
         - if (pages === 0)
-          h4 You do not have any feeds at the moment.             
-            div Get started by clicking the "Add a subscription" button to the left!
+          script.
+            $("#page-wrapper").css("padding-left", 5);
+          h4
+            i.glyphicon.glyphicon-arrow-left
+            | &nbsp; Get started by clicking the "Add a subscription" button to the left!
 
   script.
-    $('.sidebar-collapse').niceScroll("#side-menu")
+    $("li a.user-edit").click(function(e) {
+      e.preventDefault();
+
+      $.ajax("/user/edit").done(function(data) {
+        $("#page-wrapper").html(data);
+      });
+    });
+
+    $("#side-menu a.feeds-new").click(function(e) {
+      e.preventDefault();
+
+      $.ajax("/user/#{uid}/feeds/new").done(function(data) {
+        $("#page-wrapper").html(data);
+      });
+    });

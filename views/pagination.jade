@@ -1,0 +1,18 @@
+block pagination
+  - var numOfLinks = 8
+  - if (page === 1)
+    li.disabled: a(href="#") &laquo;
+  - else
+    li: a(href='#{"/user/" + uid + "/feeds/" + fidUrl + "?page=" + (page-1)}') &laquo;
+
+  - var start = ((page-numOfLinks/2 <= 0) ? 1 : (page-numOfLinks/2));
+  - for (var p = start; p <= ((page+numOfLinks/2 <= pages) ? (start+numOfLinks) : pages); p++)
+    - if (p === page)
+      li.active: a(href='#{"/user/" + uid + "/feeds/" + fidUrl + "?page=" + p}') #{p}
+    - else
+      li: a(href='#{"/user/" + uid + "/feeds/" + fidUrl + "?page=" + p}') #{p}
+
+  - if (page === pages)
+    li.disabled: a(href="#") &raquo;
+  - else
+    li: a(href='#{"/user/" + uid + "/feeds/" + fidUrl + "?page=" + (page+1)}') &raquo;

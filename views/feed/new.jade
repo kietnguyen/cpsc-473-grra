@@ -1,12 +1,11 @@
-extends ../layout
-
-block content
-  p.col-sm-12
-    a(href='/user/#{uid}/feeds')
-      span.glyphicon.glyphicon-home &nbsp;
-      | Back to all feeds
-  form.col-sm-12(role='form', method='post', action='/user/#{uid}/feeds')
-    .input-group
-      input.form-control(type='url', id='url', name='url', required, placeholder='New Feed URL')
-      spand.input-group-btn
-        button.btn.btn-primary(type='submit') Add
+.col-md-offset-2.col-md-8
+  .panel.panel-default
+    .panel-body(style="padding:30px")
+      form(method="POST", action="/user/#{uid}/feeds")
+        .form-group
+          .input-group
+            .input-group-addon: i.fa.fa-chain.fa-fw
+            input.form-control(type='url', id='url', name='url', required, placeholder='Enter a new feed URL')
+        .text-center
+          input.btn.btn-primary(type="submit", value="Add", style="margin-right: 12px; width: 69px;")
+          a.btn.btn-default.cancel-btn(href="#") Cancel

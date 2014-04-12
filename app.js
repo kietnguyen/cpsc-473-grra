@@ -74,8 +74,8 @@ app.get("/user/signup/:status", user.new);
 app.post("/user/signup", user.create);
 app.get("/user/logout", user.isAuthenticated, user.logout);
 app.get('/user', user.isAuthenticated, user.show); //preliminary test for navigating to authenticated pages
-app.get('/user/:uid/edit', user.isAuthenticated, user.getupdate);
-app.post('/user/:uid/update', user.isAuthenticated, user.update);
+app.get('/user/edit', user.isAuthenticated, user.getupdate);
+app.post('/user/update', user.isAuthenticated, user.update);
 app.delete('/user', user.delete);
 
 // feed

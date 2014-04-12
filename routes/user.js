@@ -5,7 +5,8 @@ require('../models/user.js');
 
 var mongo = require("mongodb").MongoClient,
     mongoose = require('mongoose'),
-    User = mongoose.model('User');
+    User = mongoose.model('User'),
+    errorHandler = require("./error");
 
 //LL - Check if the desired username already exists
 function doesUserExist(req, res, callback){
@@ -126,8 +127,7 @@ exports.getupdate = function(req, res) {
     return res.redirect("/user/login");
 
   res.render("user/update",
-             { title: "GRRA | Update Account",
-              uid: req.params.uid });
+             { title: "GRRA | Update Account" });
 };
 
 exports.update = function(req, res) {
@@ -138,14 +138,10 @@ exports.update = function(req, res) {
   if (uid === undefined)
     return res.redirect("/user/login");
 
-  User.update(
-    { _id: mongoose.Types.ObjectId(uid) },
+  User.findByIdAndUpdate(
+    { _id: uid },
     { username: user, password: pass },
-    { safe: true },
     function(err, records) {
-      if (err) {
-        errorHandler.loadPage(500, err, res);
-      }
       console.log("Record updated as " + records);
 
       if (records) {
