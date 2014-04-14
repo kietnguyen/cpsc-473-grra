@@ -3,8 +3,7 @@
 
 var express = require('express'),
     http = require('http'),
-    path = require('path'),
-    helpers = require('view-helpers');
+    path = require('path');
 
 var routes = require('./routes'),
     user = require('./routes/user'),
@@ -51,7 +50,6 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(helpers());
 app.use(express.cookieParser());
 app.use(express.session({secret:"$ecreT"}));
 app.use(app.router);
