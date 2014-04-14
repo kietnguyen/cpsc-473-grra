@@ -56,123 +56,122 @@ exports.create = function(req, res) {
     return res.redirect("/user/login");
 
   var flag = true;
-
-  req = request(req.body.url);
   var feedparser = new FeedParser();
+	
+  req = request(req.body.url);
 
   req.on('error', function (error) {
-    return errorHandler.loadPage(404, new Error('Error reading request'), res);
+	return errorHandler.loadPage(404, new Error('Error reading request'), res);
   });
 
   req.on('response', function (res) {
-    var stream = this;
+	var stream = this;
 
-    if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
+	if (res.statusCode != 200) return this.emit('error', new Error('Bad status code'));
 
-    stream.pipe(feedparser);
+	stream.pipe(feedparser);
   });
 
   feedparser.on('error', function(error) {
-    return errorHandler.loadPage(404, new Error('Error parsing'), res);
+	return errorHandler.loadPage(404, new Error('Error parsing'), res);
   });
 
   feedparser.on('readable', function() {
-    var stream = this,
-        meta = this.meta,
-        item;
+	var stream = this,
+		meta = this.meta,
+		item;
 
-    var theArray = [];
-    var theItem = {
-      title: "",
-      url: "",
-      description: "",
-      pubDate: "",
-      author: ""
-    };
-    var updateFlag = true;
+	var theArray = [];
+	var theItem = {
+	  title: "",
+	  url: "",
+	  description: "",
+	  pubDate: "",
+	  author: ""
+	};
+	var updateFlag = true;
 
-    while (item = stream.read()) {
-      theItem = {
-        title: item.title,
-        url: item.link,
-        description: item.description,
-        pubDate: item.pubdate,
-        author: item.author
-      };
-      // push the items to prepare for storage in database
-      theArray.push(theItem);
+	while (item = stream.read()) {
+	  theItem = {
+		title: item.title,
+		url: item.link,
+		description: item.description,
+		pubDate: item.pubdate,
+		author: item.author
+	  };
+	  // push the items to prepare for storage in database
+	  theArray.push(theItem);
 
-    }
+	}
 
-    if(flag === true) {
-      Feed.find({'title': meta.title}, function(err, theResult) {
-        if(theResult.length) {
-          Feed.find({'title': meta.title, 'uid': uid }, function (err1, theResult1) {
-            if(theResult1.length) {
-              // uid is already stored
-            }
-            else {
-              // if the uid does not exist, store it in the uid array
-              Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
-            }
-          });
-          console.log("flag is false");
-          updateFlag = false;
-        }
-        else {
-          // create new feed entry
-          console.dir(meta);
-          var feedUrl = (meta.xmlurl || meta.xmlUrl);
-          if (!feedUrl) {
-            try {
-              feedUrl = meta["atom:id"]["#"];
-            } catch (e) {
-              console.error(e);
-              res.redirect("/user/" + uid + "/feeds/new");
-            }
-          }
-          var newFeed = new Feed({
-            uid: [ uid ],
-            title: meta.title,
-            url:  feedUrl,
-            description: meta.description,
-          });
+	if(flag === true) {
+	  Feed.find({'title': meta.title}, function(err, theResult) {
+		if(theResult.length) {
+		  Feed.find({'title': meta.title, 'uid': uid }, function (err1, theResult1) {
+			if(theResult1.length) {
+			  // uid is already stored
+			}
+			else {
+			  // if the uid does not exist, store it in the uid array
+			  Feed.update({title: meta.title}, {$push: {"uid": uid}}, function(err) { if (err) {console.log("error");}});
+			}
+		  });
+		  console.log("flag is false");
+		  updateFlag = false;
+		}
+		else {
+		  // create new feed entry
+		  console.dir(meta);
+		  var feedUrl = (meta.xmlurl || meta.xmlUrl || meta["rdf:@"]["about"]);
+		  if (!feedUrl) {
+			try {
+			  feedUrl = meta["atom:id"]["#"];
+			} catch (e) {
+			  console.error(e);
+			  res.redirect("/user/" + uid + "/feeds/refresh");
+			}
+		  }
+		  var newFeed = new Feed({
+			uid: [ uid ],
+			title: meta.title,
+			url:  feedUrl,
+			description: meta.description,
+		  });
 
-          // save the feed entry
-          newFeed.save( function(error, data){
-            if(error){
-              console.log(error);
-              return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
-            }
-            else{
-            }
-          });
-        }
-      });
+		  // save the feed entry
+		  newFeed.save( function(error, data){
+			if(error){
+			  console.log(error);
+			  return errorHandler.loadPage(404, new Error('Feed cannot be saved'), res);
+			}
+			else{
+			}
+		  });
+		}
+	  });
 
-      flag = false;
+	  flag = false;
 
-    }
+	}
 
-    // push the items into the items array in the database entry
-    // find to see if item is already in the field
-    Feed.find({title: meta.title, items: {$elemMatch: {'title': theItem.title} } }, function(err, result) {
-      if (result.length) {
-      }
-      else {
-        // if item is not there, add it to the entry
-        Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) {
-          if (err) {
-            console.log("error");
-          }
-        });
-      }
-    });
+	// push the items into the items array in the database entry
+	// find to see if item is already in the field
+	Feed.find({title: meta.title, items: {$elemMatch: {'title': theItem.title} } }, function(err, result) {
+	  if (result.length) {
+	  }
+	  else {
+		// if item is not there, add it to the entry
+		Feed.update({title: meta.title}, {$push: {"items": theItem}}, function(err) {
+		  if (err) {
+			console.log("error");
+		  }
+		});
+	  }
+	});
   });
-
+	
   feedparser.on("end", function(err) {
     if (err) console.error(err);
-    console.log("hello");
     var redirectUrl = "/user/" + uid + "/feeds/refresh";
     redirect(redirectUrl, res);
   });
