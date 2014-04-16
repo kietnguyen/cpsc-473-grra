@@ -2,10 +2,10 @@
 "use strict";
 
 exports.loadPage = function (httpStatusCode, err, res) {
-  console.error(err);
+	console.error(err);
 
-  return res.render('errorPage', {
-    title: "Edify | Something has gone wrong",
-    httpStatusCode: httpStatusCode
-  } );
+	return res.render("errorPage", {
+		title: "Edify | Something has gone wrong",
+		httpStatusCode: httpStatusCode
+	} );
 };
