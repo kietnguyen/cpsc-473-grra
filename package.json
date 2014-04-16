@@ -8,7 +8,6 @@
   "dependencies": {
     "express": "3.4.8",
     "jade": "*",
-    "underscore": "*",
     "mongoose": "*",
     "feedparser": "*",
     "moment": "^2.5.1",

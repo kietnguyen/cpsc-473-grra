@@ -1,16 +1,11 @@
 #!/usr/bin/env node
 "use strict";
 
-require('./user.js');
+require("./user.js");
 
-var mongoose = require('mongoose'),
-    _ = require("lodash"),
-    env = process.env.NODE_ENV || 'development',
-    config = require('../config/config')[env],
+var mongoose = require("mongoose"),
     Schema = mongoose.Schema,
-    User = mongoose.model('User');
-
-var connection = mongoose.createConnection(config.db);
+    _ = require("lodash");
 
 var FeedSchema = new Schema({
   uid: [{ type: Schema.Types.ObjectId, ref: "User" }],
@@ -27,14 +22,14 @@ var FeedSchema = new Schema({
     title: { type: String, trim: true },
     url: { type: String, trim: true },
     description: { type: String, trim: true },
-    pubDate: {type: Date, required: true }, // break if feed doesn't have this
+    pubDate: {type: Date, required: true },
     author: { type: String, trim: true }
   }]
 });
 
 // Feed validation
-FeedSchema.path('title').required(true, 'Feed title cannot be blank');
-FeedSchema.path('url').required(true, 'Feed URL cannot be blank');
+FeedSchema.path("title").required(true, "Feed title cannot be blank");
+FeedSchema.path("url").required(true, "Feed URL cannot be blank");
 
 FeedSchema.methods = {
 
@@ -47,11 +42,40 @@ FeedSchema.statics = {
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
       { $project: { _id: 0, items: 1 } },
-      { $unwind: '$items'},
-      { $sort: { 'items.pubDate': -1 } },
+      { $unwind: "$items"},
+      { $sort: { "items.pubDate": -1 } },
       { $skip: options.perPage * options.page },
       { $limit: options.perPage } )
     .exec(cb);
+  },
+
+  // Add new items
+  addNewItems: function(queryOpts, cb) {
+    //console.dir(queryOpts);
+    this.findOne(
+      { url: queryOpts.url },
+      function(err, feed) {
+        var allUrls = _.pluck(feed.items, "url");
+        var newItems = _.filter(queryOpts.items, function(val) {
+          return !_.contains(allUrls, val.url);
+        });
+
+        //console.dir(feed.items.length);
+        //console.dir(newItems.length);
+        _.each(newItems, function(item) {
+          feed.items.push(item);
+        });
+        //console.dir(feed.items.length);
+        feed.save(function(err, product, affected) {
+          if (err) {
+            console.error(err);
+          }
+
+          //console.log(affected);
+
+          cb();
+        });
+      });
   },
 
   // Count number of feed items
@@ -59,7 +83,7 @@ FeedSchema.statics = {
     this.aggregate(
       { $match: { _id: { $in: options.feeds } } },
       { $project: { _id: 0, items: 1 } },
-      { $unwind: '$items'},
+      { $unwind: "$items"},
       { $group: { _id: null, total: { $sum: 1 } } } )
     .exec(cb);
   },
@@ -91,10 +115,6 @@ FeedSchema.statics = {
     .exec(cb);
   },
 
-  addItems: function(items, cb) {
-    // wip
-  },
-
   validateFeedId: function(fid, cb) {
     this.findOne( { _id: fid }, { _id: 1 } )
     .exec(cb);
@@ -102,4 +122,4 @@ FeedSchema.statics = {
 
 };
 
-mongoose.model('Feed', FeedSchema);
+mongoose.model("Feed", FeedSchema);

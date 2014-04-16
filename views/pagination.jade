@@ -5,8 +5,13 @@ block pagination
   - else
     li: a(href='#{"/user/" + uid + "/feeds/" + fidUrl + "?page=" + (page-1)}') &laquo;
 
-  - var start = ((page-numOfLinks/2 <= 0) ? 1 : (page-numOfLinks/2));
-  - for (var p = start; p <= ((page+numOfLinks/2 <= pages) ? (start+numOfLinks) : pages); p++)
+  - var start = ((page-numOfLinks/2 <= 0) ? 1 : (page-numOfLinks/2))
+  - if (start === 1)
+    - var end = ((numOfLinks + 1) < pages ? (numOfLinks + 1) : pages)
+  - else var end = ((start + numOfLinks) < pages ? (start + numOfLinks) : pages)
+  - if (end === pages)
+    - start = (pages - numOfLinks > 0 ? pages - numOfLinks : 1)
+  - for (var p = start; p <= end; p++)
     - if (p === page)
       li.active: a(href='#{"/user/" + uid + "/feeds/" + fidUrl + "?page=" + p}') #{p}
     - else

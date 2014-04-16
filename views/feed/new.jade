@@ -5,7 +5,9 @@
         .form-group
           .input-group
             .input-group-addon: i.fa.fa-chain.fa-fw
-            input.form-control(type='url', id='url', name='url', required, placeholder='Enter a new feed URL')
+            input.form-control(type="url", id="url", pattern = "http://.*\.xml\*|http://.*\.rss\*", name="url", required, placeholder="Enter a valid new feed URL")
         .text-center
+          p
+            Please Enter a valid RSS URL starting with http:// and ending with .xml or .rss.
           input.btn.btn-primary(type="submit", value="Add", style="margin-right: 12px; width: 69px;")
           a.btn.btn-default.cancel-btn(href="#") Cancel
