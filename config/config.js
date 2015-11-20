@@ -1,4 +1,4 @@
-var path = require('path'), 
+var path = require('path'),
     rootPath = path.normalize(__dirname + '/..');
 
 module.exports = {
@@ -17,7 +17,7 @@ module.exports = {
     }
   },
   production: {
-    db: 'mongodb://localhost/grra',
+    db: process.env.MONGOLAB_URI || 'mongodb://localhost/grra',
     root: rootPath,
     app: {
       name: "Google Reader's Replacement App"
