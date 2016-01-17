@@ -3,7 +3,6 @@
 * [express](http://expressjs.com/3x/api.html)
 * [lodash](http://lodash.com/docs)
 * [mongoose](http://mongoosejs.com/docs/api.html)
-* [mongoose-auto-increment](https://github.com/codetunnel/mongoose-auto-increment)
 * [moment](http://momentjs.com/)
 * [view-helpers](https://github.com/madhums/node-view-helpers)
 
